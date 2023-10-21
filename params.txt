@@ -1,0 +1,38 @@
+############################################################
+# File containing the physical properties defining a cloud #
+############################################################
+
+#######################
+# Physical Dimensions #
+#######################
+
+# Number of particles [no units]
+2e3
+
+# Min x, max x, min y, max y, min z, max z [pc]
+0       
+100            
+0                   
+100
+0
+100
+
+# Spherical cloud radius [pc]
+## Leave value in even if not using ##
+100                                 
+
+# Total mass of the cloud [Msun]
+1000
+
+###################
+# Thermal Physics #
+###################
+
+# Temperature of the cloud [K]
+10                           
+
+# Mean molecular weight of the cloud [no units]
+1.4                                  
+
+# Virial parameter, ratio of KE to GPE [no units]
+2                                     
