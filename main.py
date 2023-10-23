@@ -6,6 +6,7 @@
 # Imports
 import numpy as np
 import os
+from time import time
 
 # Reading in the config and physical properties files
 directory = os.path.dirname(os.path.realpath(__file__))
@@ -31,6 +32,8 @@ epsilon = params[11]
 #######################
 # Grid type selection #
 #######################
+
+initTime = time()
 
 # Uniform particle grid setups
 if config[0] == "boxGrid" or config[0] == "sphereGrid":
@@ -59,6 +62,10 @@ elif config[0] == "sphereRan":
     # Creating a random spherical grid
     pos, volume = sphereRandom(ngas, radius)
 
+gridFinTime = time()
+
+print("Particle grid created in {:.2f} s".format(gridFinTime-initTime))
+
 ###########################
 # Mass and energy defines #
 ###########################
@@ -71,6 +78,10 @@ pMass = masses(ngas, totalMass)
 
 # Working out internal energy of each particle along with the sound speed
 pEnergy, cs = thermalEnergy(ngas, temperature, mu)
+
+mAndeTime = time()
+
+print("Particle masses and energies calculated in {:.2f}".format(mAndeTime-gridFinTime))
 
 #################################
 # Velocity and Turbulence setup #
@@ -95,6 +106,10 @@ if config[1] == "turbFile":
 else:
     # Assgining an empty velocity array if no tubulence setup
     vels = np.zeros((3, ngas))
+
+turbTime = time()
+
+print("Turbulent velocities assigned in {:.2f}".format(turbTime-mAndeTime))
 
 ###################################
 # Setting particle identification #
@@ -126,9 +141,38 @@ else:
 
 import matplotlib.pyplot as plt
 
+z = pos[2][:]
 x = pos[0][:]
-y = pos[1][:]
+x = x[z==np.min(z)]
 
-plt.figure()
-plt.plot(x, y, "bo")
+y = pos[1][:]
+y = y[z==np.min(z)]
+
+print(len(x),len(x), np.shape(vels))
+
+fig = plt.figure()
+#ax = fig.add_subplot(projection="3d")
+ax = fig.add_subplot()
+
+vx = vels[0]
+vx = vx[z==np.min(z)]
+
+vy = vels[1]
+vy = vy[z==np.min(z)]
+
+ax.quiver(x,y,vx,vy)
+
+#ax.scatter(x, y, z, s=vels[0,:]*500)
+
+#plt.show()
+
+#x = np.linspace(0, 128, 128, endpoint=True)
+#y = np.linspace(0, 128, 128, endpoint=True)
+
+#X, Y = np.meshgrid(x, y)
+
+#vx = velx[:,:,0]
+#vy = vely[:,:,0]
+
+#ax.quiver(X,Y,vx,vy)
 plt.show()
