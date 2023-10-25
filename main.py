@@ -28,6 +28,8 @@ totalMass = params[8]
 temperature = params[9]
 mu = params[10]
 epsilon = params[11]
+boxDims = [params[12], params[13], params[14]]
+tempFactor = params[15]
 
 #######################
 # Grid type selection #
@@ -47,7 +49,7 @@ if config[0] == "boxGrid" or config[0] == "sphereGrid":
         from shapeTypes import sphericalCloud
 
         # Creating spherical grid
-        ngas, pos, volume = sphericalCloud(pos, radius)
+        ngas, pos, volume = sphericalCloud(pos, radius, ngas, bounds)
 
 # Randomly placed particle setups
 elif config[0] == "boxRan":
@@ -124,14 +126,17 @@ pIDs = np.linspace(0, ngas, ngas, dtype=int)
 
 # Setup for padding the box with low density particles
 if config[4] == "True":
-    if config[0] == "sphereGrid":
-        from lowDensityPadding import padBoxSphere
+    if config[0] == "boxGrid":
+        from lowDensityPadding import padBox
+
+        # Pad the box with low density particles outside the box grid
+        pos, vels, pMass, pIDs, pEnergy, pRho = padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor)
+    
+    elif config[0] == "sphereGrid":
+        from lowDensityPadding import padSphere
 
         # Pad the box with low density particles outside the spherical cloud
-        pos, vels, pMass, pIDs, pEnergy, pRho = padBoxSphere(ngas, pos, vels, pMass, pIDs, pEnergy)
-    
-    else:
-        pass
+        pos, vels, pMass, pIDs, pEnergy, pRho = padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, tempFactor)
 else:
     pass
 
@@ -141,6 +146,25 @@ else:
 
 import matplotlib.pyplot as plt
 
+x = pos[0,0:ngas]
+x2 = pos[0,ngas:]
+y = pos[1,0:ngas]
+y2 = pos[1,ngas:]
+z = pos[2,0:ngas]
+z2 = pos[2,ngas:]
+
+fig = plt.figure(figsize=(10,10))
+ax = fig.add_subplot(projection="3d")
+ax.scatter(x, y, z, s=1, color="blue")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.scatter(x2, y2, z2, s=1, color="red", )
+#plt.scatter(x[z==z[500]], y[z==z[500]], s=1, color="blue")
+#plt.scatter(x2[z2==z[500]], y2[z2==z[500]], s=1, color="red")
+plt.show()
+
+
+'''
 z = pos[2][:]
 x = pos[0][:]
 x = x[z==np.min(z)]
@@ -176,3 +200,4 @@ ax.quiver(x,y,vx,vy)
 
 #ax.quiver(X,Y,vx,vy)
 plt.show()
+'''

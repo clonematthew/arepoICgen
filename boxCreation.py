@@ -1,6 +1,24 @@
 # Needed libraries
 import numpy as np
 from random import random
+from numba import jit
+
+@jit(nopython=True)
+def tripleLoop(nx, ny, nz, pos, xmin, ymin, zmin, spacing):
+    # Looping through every particle and assigning its position
+    npart = 0
+    for i in range(nx):
+       for j in range(ny):
+            for k in range(nz):
+                # Assigning positions 
+                pos[0][npart] = xmin + (0.5 * spacing) + (i * spacing)
+                pos[1][npart] = ymin + (0.5 * spacing) + (j * spacing)
+                pos[2][npart] = zmin + (0.5 * spacing) + (k * spacing)
+
+                # Adding to counter
+                npart += 1
+
+    return pos
 
 # Code to create particles in a box grid
 def boxGrid(ngas, bounds):
@@ -19,9 +37,9 @@ def boxGrid(ngas, bounds):
     spacing = (volume / ngas)**(1./3.)
 
     # Finding the number of grid points for each dimension
-    nx = int((xmax-xmin)/spacing)
-    ny = int((ymax-ymin)/spacing)
-    nz = int((zmax-zmin)/spacing)
+    nx = np.int64((xmax-xmin)/spacing)
+    ny = np.int64((ymax-ymin)/spacing)
+    nz = np.int64((zmax-zmin)/spacing)
 
     # Resetting the number of gas particles to the rounded version 
     ngas = nx * ny * nz
@@ -30,25 +48,15 @@ def boxGrid(ngas, bounds):
     pos = np.zeros((3, ngas))
 
     # Looping through every particle and assigning its position
-    npart = 0
-    for i in range(nx):
-        for j in range(ny):
-            for k in range(nz):
-                # Assigning positions 
-                pos[0][npart] = xmin + (0.5 * spacing) + (i * spacing)
-                pos[1][npart] = ymin + (0.5 * spacing) + (j * spacing)
-                pos[2][npart] = zmin + (0.5 * spacing) + (k * spacing)
-
-                # Adding to counter
-                npart += 1
+    pos = tripleLoop(nx, ny, nz, pos, xmin, ymin, zmin, spacing)
 
     # Setting the max dimensions to the maximum particle positions 
-    xmin = min(pos[0][:])
-    xmax = max(pos[0][:])
-    ymin = min(pos[1][:])
-    ymax = max(pos[1][:])
-    zmin = min(pos[2][:])
-    zmax = max(pos[2][:]) 
+    xmin = np.min(pos[0])
+    xmax = np.max(pos[0])
+    ymin = np.min(pos[1])
+    ymax = np.max(pos[1])
+    zmin = np.min(pos[2])
+    zmax = np.max(pos[2]) 
 
     # Calculating an updated volume using these
     volume = (xmax-xmin) * (ymax-ymin) * (zmax-zmin)

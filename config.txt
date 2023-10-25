@@ -11,15 +11,16 @@
 # sphereRan  = Sphere of randomly spaced particles
 # sphereGrid = Spherical volume cut of an evenly spaced grid of particles
 
-boxGrid
+sphereGrid
 
 ####################
 # Turbulence setup #
 ####################
 
 # turbFile = Turbulence from a 3D velocity cube file
+# static   = No turbulent velocities
 
-turbFile
+static
 
 # Turbulent velocity filename ## leave as is if not using ##
 
@@ -36,4 +37,4 @@ vel3D.bin
 # True  = Pad the box outisde the cloud with low density particles
 # False = ... don't
 
-False
+True
