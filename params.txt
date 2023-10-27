@@ -7,8 +7,8 @@
 #######################
 
 # Number of particles [no units]
-#2097152
-2000
+2097152
+#200000
 
 # Min x, max x, min y, max y, min z, max z [pc]
 -64    

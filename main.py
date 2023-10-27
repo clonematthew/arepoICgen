@@ -35,6 +35,7 @@ tempFactor = params[15]
 # Grid type selection #
 #######################
 
+# Tracking how long each section takes to run
 initTime = time()
 
 # Uniform particle grid setups
@@ -64,8 +65,8 @@ elif config[0] == "sphereRan":
     # Creating a random spherical grid
     pos, volume = sphereRandom(ngas, radius)
 
+# Time taken for the grid setup
 gridFinTime = time()
-
 print("Particle grid created in {:.2f} s".format(gridFinTime-initTime))
 
 ###########################
@@ -81,8 +82,8 @@ pMass = masses(ngas, totalMass)
 # Working out internal energy of each particle along with the sound speed
 pEnergy, cs = thermalEnergy(ngas, temperature, mu)
 
+# Time taken for the energy and mass assignment
 mAndeTime = time()
-
 print("Particle masses and energies calculated in {:.2f}".format(mAndeTime-gridFinTime))
 
 #################################
@@ -96,11 +97,17 @@ if config[1] == "turbFile":
     # Loading in the turbulent velocities from the velocity cube
     velx, vely, velz = turbulenceFromFile(int(config[3]), config[2])
 
-    if config[0] == "boxGrid" or config[0] == "sphereGrid":
+    if config[0] == "boxGrid":
         from turbulence import boxGridTurbulence
 
         # Interpolating and assignning velocities
         vels = boxGridTurbulence(velx, vely, velz, pos, pMass, int(config[3]), epsilon)
+
+    elif config[0] == "sphereGrid":
+        from turbulence import sphericalGridTurbulence
+
+        # Interpolating and assigning velocities
+        vels = sphericalGridTurbulence(velx, vely, velz, pos, pMass, int(config[3]), epsilon)
     
     else:
         pass
@@ -109,8 +116,8 @@ else:
     # Assgining an empty velocity array if no tubulence setup
     vels = np.zeros((3, ngas))
 
+# Time taken for the turbulence/velocity setup
 turbTime = time()
-
 print("Turbulent velocities assigned in {:.2f}".format(turbTime-mAndeTime))
 
 ###################################
@@ -140,12 +147,24 @@ if config[4] == "True":
 else:
     pass
 
+# Time taken to pad the box 
+padTime = time()
+print("Box padded with low density particles in {:.2f} s".format(padTime-turbTime))
+
+########################
+# File output to AREPO #
+########################
+
+
+
+
 ###########
 # TESTING #
 ###########
 
 import matplotlib.pyplot as plt
 
+''''
 x = pos[0,0:ngas]
 x2 = pos[0,ngas:]
 y = pos[1,0:ngas]
@@ -162,9 +181,12 @@ ax.scatter(x2, y2, z2, s=1, color="red", )
 #plt.scatter(x[z==z[500]], y[z==z[500]], s=1, color="blue")
 #plt.scatter(x2[z2==z[500]], y2[z2==z[500]], s=1, color="red")
 plt.show()
-
-
 '''
+
+
+
+
+
 z = pos[2][:]
 x = pos[0][:]
 x = x[z==np.min(z)]
@@ -200,4 +222,3 @@ ax.quiver(x,y,vx,vy)
 
 #ax.quiver(X,Y,vx,vy)
 plt.show()
-'''

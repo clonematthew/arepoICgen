@@ -34,13 +34,14 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
 
         # Check if within sphere
         if r <= radius:
-            # Update the number of particles inside the sphere
-            ngasNew += 1
-
             # Assign new positions
             newPos[0,ngasNew] = pos[0,i] - xcom
             newPos[1,ngasNew] = pos[1,i] - ycom
             newPos[2,ngasNew] = pos[2,i] - zcom
+
+            # Update the number of particles inside the sphere
+            ngasNew += 1
+
 
     # Reallocating the position array
     pos = np.zeros((3, ngasNew))
