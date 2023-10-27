@@ -14,8 +14,8 @@ directory = os.path.dirname(os.path.realpath(__file__))
 #paramFile = str(directory) + "\\" + input("Physical Parameter file: ") + ".txt"
 #configFile = str(directory) + "\\" + input("Configuration File: ") + ".txt"
 
-paramFile = str(directory) + "\\params.txt"
-configFile = str(directory) + "\\config.txt"
+paramFile = str(directory) + "/params.txt"
+configFile = str(directory) + "/config.txt"
 
 params = np.loadtxt(paramFile, dtype=int)
 config = np.loadtxt(configFile, dtype=str)

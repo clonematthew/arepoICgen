@@ -3,7 +3,7 @@ import numpy as np
 from scipy import interpolate
 from scipy.io import FortranFile
 from tqdm import tqdm
-from numba import njit, prange
+from numba import njit, prange, jit
 
 # Function to load in the velocities from file
 def turbulenceFromFile(gridSize, filename):
@@ -18,9 +18,9 @@ def turbulenceFromFile(gridSize, filename):
     return velx, vely, velz
 
 # Function to carry out the interpolation, compiled with jit
-@njit(parallel=True)
+@jit(nopython=True)
 def turbLoopBox(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli):
-    for i in prange(ngas):
+    for i in range(ngas):
         # Finding positions in the velocity array our particle positions refer to
         iposx = np.int64((pos[0,i]/radnorm)*gridSize+0.5)
         iposx = np.min(np.array([np.max(np.array([iposx, 0.], dtype=np.int64)), gridSize-2.], dtype=np.int64))
@@ -71,22 +71,22 @@ def turbLoopBox(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli):
     return vels
 
 # Function to interpolate velocites for the spherical grid
-@njit(parallel=True)
+@jit(nopython=True)
 def turbLoopSphere(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli):
-    for i in prange(ngas):
+    for i in range(ngas):
         # Finding positions in the velocity array our particle positions refer to
-        iposx = np.int64(pos[0,i]/radnorm * (gridSize/2) + (gridSize/2) + 0.5)
+        iposx = np.int64(pos[0,i]/radnorm * (gridSize/2.) + (gridSize/2.) + 0.5)
         iposx = np.min(np.array([np.max(np.array([iposx, 0.], dtype=np.int64)), gridSize-2.], dtype=np.int64))
 
-        iposy = np.int64(pos[1,i]/radnorm * (gridSize/2) + (gridSize/2) + 0.5)
+        iposy = np.int64(pos[1,i]/radnorm * (gridSize/2.) + (gridSize/2.) + 0.5)
         iposy = np.min(np.array([np.max(np.array([iposy, 0.], dtype=np.int64)), gridSize-2.], dtype=np.int64))
 
-        iposz = np.int64(pos[2,i]/radnorm * (gridSize/2) + (gridSize/2) + 0.5)
+        iposz = np.int64(pos[2,i]/radnorm * (gridSize/2.) + (gridSize/2.) + 0.5)
         iposz = np.min(np.array([np.max(np.array([iposz, 0.], dtype=np.int64)), gridSize-2.], dtype=np.int64))
 
-        delx = pos[0,i] - (iposx - (gridSize/2) - 0.5) / np.real(gridSize/2) * radnorm
-        dely = pos[1,i] - (iposy - (gridSize/2) - 0.5) / np.real(gridSize/2) * radnorm
-        delz = pos[2,i] - (iposz - (gridSize/2) - 0.5) / np.real(gridSize/2) * radnorm
+        delx = pos[0,i] - (iposx - (gridSize/2.) - 0.5) / np.real(gridSize/2.) * radnorm
+        dely = pos[1,i] - (iposy - (gridSize/2.) - 0.5) / np.real(gridSize/2.) * radnorm
+        delz = pos[2,i] - (iposz - (gridSize/2.) - 0.5) / np.real(gridSize/2.) * radnorm
 
         # Interpolating the x velocity
         velx1 = velx[iposx,iposy,iposz] + delx/deli * ((velx[iposx+1,iposy,iposz]) - velx[iposx,iposy,iposz])
