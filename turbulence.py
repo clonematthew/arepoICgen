@@ -1,9 +1,7 @@
 # Importing libraries
 import numpy as np
-from scipy import interpolate
 from scipy.io import FortranFile
-from tqdm import tqdm
-from numba import njit, prange, jit
+from numba import jit
 
 # Function to load in the velocities from file
 def turbulenceFromFile(gridSize, filename):
@@ -163,11 +161,21 @@ def scaleVelocities(ngas, vels, pMass, radnorm, epsilon):
 
 # Function to interpolate velocities for a box grid
 def boxGridTurbulence(velx, vely, velz, pos, pMass, gridSize, epsilon):
+    # Moving the box to have no negative values
+    xmin = np.min(pos[0])
+    if xmin < 0:
+        pos[0] += abs(xmin)
+
+    ymin = np.min(pos[1])
+    if ymin < 0:
+        pos[1] += abs(ymin)
+    
+    zmin = np.min(pos[2])
+    if zmin < 0:
+        pos[2] += abs(zmin)
+
     # Finding the centre of mass
     ngas = len(pMass)
-
-    # Finding the total mass
-    mtot = np.sum(pMass)
 
     # Finding scaling factors
     radnorm = np.max([np.max(pos[0]), np.max(pos[1]), np.max(pos[2])])

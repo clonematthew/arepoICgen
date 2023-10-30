@@ -42,7 +42,6 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
             # Update the number of particles inside the sphere
             ngasNew += 1
 
-
     # Reallocating the position array
     pos = np.zeros((3, ngasNew))
     pos[0] = newPos[0,0:ngasNew]

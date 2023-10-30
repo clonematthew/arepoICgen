@@ -11,7 +11,7 @@
 # sphereRan  = Sphere of randomly spaced particles
 # sphereGrid = Spherical volume cut of an evenly spaced grid of particles
 
-sphereGrid
+boxGrid
 
 ####################
 # Turbulence setup #
@@ -37,4 +37,4 @@ vel3D.bin
 # True  = Pad the box outisde the cloud with low density particles
 # False = ... don't
 
-False
+True

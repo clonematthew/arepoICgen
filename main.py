@@ -17,7 +17,7 @@ directory = os.path.dirname(os.path.realpath(__file__))
 paramFile = str(directory) + "/params.txt"
 configFile = str(directory) + "/config.txt"
 
-params = np.loadtxt(paramFile, dtype=int)
+params = np.loadtxt(paramFile, dtype=int, converters=float)
 config = np.loadtxt(configFile, dtype=str)
 
 # Unpacking the parameter file
@@ -36,6 +36,7 @@ tempFactor = params[15]
 #######################
 
 # Tracking how long each section takes to run
+print("Creating particle grid points")
 initTime = time()
 
 # Uniform particle grid setups
@@ -90,6 +91,8 @@ print("Particle masses and energies calculated in {:.2f}".format(mAndeTime-gridF
 # Velocity and Turbulence setup #
 #################################
 
+print("Assignning turbulent velocities")
+
 # Setup for turbulence from a velocity cube file
 if config[1] == "turbFile":
     from turbulence import turbulenceFromFile
@@ -131,6 +134,8 @@ pIDs = np.linspace(0, ngas, ngas, dtype=int)
 # Low density particle padding #
 ################################
 
+print("Padding box with low density particles")
+
 # Setup for padding the box with low density particles
 if config[4] == "True":
     if config[0] == "boxGrid":
@@ -164,7 +169,7 @@ print("Box padded with low density particles in {:.2f} s".format(padTime-turbTim
 
 import matplotlib.pyplot as plt
 
-''''
+
 x = pos[0,0:ngas]
 x2 = pos[0,ngas:]
 y = pos[1,0:ngas]
@@ -172,7 +177,7 @@ y2 = pos[1,ngas:]
 z = pos[2,0:ngas]
 z2 = pos[2,ngas:]
 
-fig = plt.figure(figsize=(10,10))
+fig = plt.figure(figsize=(7,7))
 ax = fig.add_subplot(projection="3d")
 ax.scatter(x, y, z, s=1, color="blue")
 ax.set_xlabel("x")
@@ -181,32 +186,36 @@ ax.scatter(x2, y2, z2, s=1, color="red", )
 #plt.scatter(x[z==z[500]], y[z==z[500]], s=1, color="blue")
 #plt.scatter(x2[z2==z[500]], y2[z2==z[500]], s=1, color="red")
 plt.show()
+
 '''
 
 
 
 
-
 z = pos[2][:]
+
 x = pos[0][:]
-x = x[z==np.min(z)]
+x = x[z==z[20000]]
 
 y = pos[1][:]
-y = y[z==np.min(z)]
+y = y[z==z[20000]]
 
 print(len(x),len(x), np.shape(vels))
 
 fig = plt.figure()
+
 #ax = fig.add_subplot(projection="3d")
 ax = fig.add_subplot()
+ax.set_aspect("equal")
 
 vx = vels[0]
-vx = vx[z==np.min(z)]
+vx = vx[z==z[20000]]
 
 vy = vels[1]
-vy = vy[z==np.min(z)]
+vy = vy[z==z[20000]]
 
 ax.quiver(x,y,vx,vy)
+'''
 
 #ax.scatter(x, y, z, s=vels[0,:]*500)
 
@@ -222,3 +231,4 @@ ax.quiver(x,y,vx,vy)
 
 #ax.quiver(X,Y,vx,vy)
 plt.show()
+

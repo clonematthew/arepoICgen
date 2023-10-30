@@ -31,13 +31,18 @@ def padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
     pEnergy = np.append(pEnergy, newEnergy)
     pRho = np.append(np.ones(ngas), newRho)
 
-    # Setting new cloud dimensions
-    xmin = - 0.5 * boxDims[0]
-    xmax = 0.5 * boxDims[0]
-    ymin = - 0.5 * boxDims[1]
-    ymax = 0.5 * boxDims[1]
-    zmin = - 0.5 * boxDims[2]
-    zmax = 0.5* boxDims[2]
+    # Getting the centre point of each dimension
+    xMid = 0.5 * (xmaxOld + xminOld)
+    yMid = 0.5 * (ymaxOld + yminOld)
+    zMid = 0.5 * (zmaxOld + zminOld)
+
+    # Getting the limits of our box
+    xmin = xMid - boxDims[0]/2
+    xmax = xMid + boxDims[0]/2
+    ymin = yMid - boxDims[1]/2
+    ymax = yMid + boxDims[1]/2
+    zmin = zMid - boxDims[2]/2
+    zmax = zMid + boxDims[2]/2
 
     # Working out volumes
     boxVolume = (xmax - xmin) * (ymax - ymin) * (zmax - zmin)
