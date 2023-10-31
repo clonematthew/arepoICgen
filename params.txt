@@ -7,8 +7,8 @@
 #######################
 
 # Number of particles [no units]
-#2097152
-20000
+2097152
+#20000
 
 # Min x, max x, min y, max y, min z, max z [pc]
 -64
@@ -20,7 +20,7 @@
 
 # Spherical cloud radius [pc]
 ## Leave value in even if not using ##
-100                                 
+64                                 
 
 # Total mass of the cloud [Msun]
 1000
@@ -36,16 +36,23 @@
 1.4                                  
 
 # Virial parameter, ratio of KE to GPE [no units]
-2                
+2         
+
+####################
+# Rotation Physics #
+####################
+
+# Beta parameter, ratio of rotational KE to GPE [no units]
+5
 
 ####################
 # Box Padding Info #
 ####################
 
-# The x, y and z size of the box around the cloud [pc]
-256
-256
-256
+# The x, y and z size of the box around the cloud, multiples of the cloud size [pc]
+2
+2
+2
 
 # How much hotter these particles should be compared to the cloud [no units]
 2

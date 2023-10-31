@@ -28,8 +28,9 @@ totalMass = params[8]
 temperature = params[9]
 mu = params[10]
 epsilon = params[11]
-boxDims = [params[12], params[13], params[14]]
-tempFactor = params[15]
+beta = params[12]
+boxDims = [params[13], params[14], params[15]]
+tempFactor = params[16]
 
 #######################
 # Grid type selection #
@@ -87,14 +88,14 @@ pEnergy, cs = thermalEnergy(ngas, temperature, mu)
 mAndeTime = time()
 print("Particle masses and energies calculated in {:.2f}".format(mAndeTime-gridFinTime))
 
-#################################
-# Velocity and Turbulence setup #
-#################################
+################################
+# Velocities: Turbulence setup #
+################################
 
-print("Assignning turbulent velocities")
 
 # Setup for turbulence from a velocity cube file
 if config[1] == "turbFile":
+    print("Assigning turbulent velocities")
     from turbulence import turbulenceFromFile
 
     # Loading in the turbulent velocities from the velocity cube
@@ -123,32 +124,45 @@ else:
 turbTime = time()
 print("Turbulent velocities assigned in {:.2f}".format(turbTime-mAndeTime))
 
+########################
+# Velocities: Rotation #
+########################
+
+# Add rotation to the body
+if config[4] == "rotation":
+    print("Adding solid body rotation")
+    from rotation import addRotation
+
+    # Add rotation around z axis of given beta energy ratio
+    vels = addRotation(pos, pMass, vels, beta)
+else:
+    pass
+
 ###################################
 # Setting particle identification #
 ###################################
 
-# ssigning each particle an ID from 0 to the max number of particles
+# Assigning each particle an ID from 0 to the max number of particles
 pIDs = np.linspace(0, ngas, ngas, dtype=int)
 
 ################################
 # Low density particle padding #
 ################################
 
-print("Padding box with low density particles")
-
 # Setup for padding the box with low density particles
-if config[4] == "True":
+if config[5] == "True":
+    print("Padding box with low density particles")
     if config[0] == "boxGrid":
         from lowDensityPadding import padBox
 
         # Pad the box with low density particles outside the box grid
-        pos, vels, pMass, pIDs, pEnergy, pRho = padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor)
+        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor)
     
     elif config[0] == "sphereGrid":
         from lowDensityPadding import padSphere
 
         # Pad the box with low density particles outside the spherical cloud
-        pos, vels, pMass, pIDs, pEnergy, pRho = padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, tempFactor)
+        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor)
 else:
     pass
 
@@ -160,8 +174,15 @@ print("Box padded with low density particles in {:.2f} s".format(padTime-turbTim
 # File output to AREPO #
 ########################
 
+print("Writing output file")
 
+if config[6] == "arepo":
+    from arepoOut import arepoOut
 
+    # Write out the data to a type 2 AREPO file 
+    arepoOut(ngasAll, pos, vels, pIDs, pMass, pEnergy)
+else:
+    pass
 
 ###########
 # TESTING #
@@ -185,7 +206,7 @@ ax.set_ylabel("y")
 ax.scatter(x2, y2, z2, s=1, color="red", )
 #plt.scatter(x[z==z[500]], y[z==z[500]], s=1, color="blue")
 #plt.scatter(x2[z2==z[500]], y2[z2==z[500]], s=1, color="red")
-plt.show()
+#plt.show()
 
 '''
 
@@ -230,5 +251,5 @@ ax.quiver(x,y,vx,vy)
 #vy = vely[:,:,0]
 
 #ax.quiver(X,Y,vx,vy)
-plt.show()
+#plt.show()
 

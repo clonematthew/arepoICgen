@@ -37,12 +37,12 @@ def padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
     zMid = 0.5 * (zmaxOld + zminOld)
 
     # Getting the limits of our box
-    xmin = xMid - boxDims[0]/2
-    xmax = xMid + boxDims[0]/2
-    ymin = yMid - boxDims[1]/2
-    ymax = yMid + boxDims[1]/2
-    zmin = zMid - boxDims[2]/2
-    zmax = zMid + boxDims[2]/2
+    xmin = xMid - boxDims[0] * (xmaxOld + xminOld) / 2
+    xmax = xMid + boxDims[0] * (xmaxOld + xminOld) / 2
+    ymin = yMid - boxDims[1] * (ymaxOld + yminOld) / 2
+    ymax = yMid + boxDims[1] * (ymaxOld + yminOld) / 2
+    zmin = zMid - boxDims[2] * (zmaxOld + zminOld) / 2
+    zmax = zMid + boxDims[2] * (zmaxOld + zminOld) / 2
 
     # Working out volumes
     boxVolume = (xmax - xmin) * (ymax - ymin) * (zmax - zmin)
@@ -91,10 +91,10 @@ def padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
             pMass[pID] = newParticleMass
             pRho[pID] = 0.01 * cloudDensity
 
-    return pos, vels, pMass, pIDs, pEnergy, pRho
+    return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)
 
 # Function to pad a spherical grid
-def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, tempFactor):
+def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
     # Use 2% of the number of particles to pad the box 
     nPaddingParticles = int(0.02 * ngas)
 
@@ -121,12 +121,12 @@ def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, tempFactor):
     zcom = np.sum(pos[2] * pMass) / mtot
 
     # Getting dimensions from this
-    xmin = 2 * np.min(pos[0])
-    xmax = 2 * np.max(pos[0])
-    ymin = 2 *np.min(pos[1])
-    ymax = 2* np.max(pos[1])
-    zmin = 2 *np.min(pos[2])
-    zmax = 2* np.max(pos[2])
+    xmin = boxDims[0] * np.min(pos[0])
+    xmax = boxDims[0] * np.max(pos[0])
+    ymin = boxDims[1] * np.min(pos[1])
+    ymax = boxDims[1] * np.max(pos[1])
+    zmin = boxDims[2] * np.min(pos[2])
+    zmax = boxDims[2] * np.max(pos[2])
 
     # Find radius of the cloud
     cloudRadius = np.max(np.sqrt((pos[0] - xcom)**2 + (pos[1] - ycom)**2 + (pos[2] - zcom)**2))
@@ -170,7 +170,7 @@ def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, tempFactor):
         else:
             pass
 
-    return pos, vels, pMass, pIDs, pEnergy, pRho
+    return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)
 
 
 

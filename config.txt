@@ -11,7 +11,7 @@
 # sphereRan  = Sphere of randomly spaced particles
 # sphereGrid = Spherical volume cut of an evenly spaced grid of particles
 
-boxGrid
+sphereGrid
 
 ####################
 # Turbulence setup #
@@ -20,7 +20,7 @@ boxGrid
 # turbFile = Turbulence from a 3D velocity cube file
 # static   = No turbulent velocities
 
-turbFile
+static
 
 # Turbulent velocity filename ## leave as is if not using ##
 
@@ -30,6 +30,15 @@ vel3D.bin
 
 128
 
+##################
+# Rotation Setup #
+##################
+
+# rotation = Add rotation to the body
+# static   = No body rotation
+
+rotation
+
 #######################
 # Low Density Padding #
 #######################
@@ -38,3 +47,11 @@ vel3D.bin
 # False = ... don't
 
 True
+
+###############
+# File Output #
+###############
+
+# arepo = Output a type 2 arepo datafile
+
+arepo
