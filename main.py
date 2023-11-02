@@ -17,7 +17,7 @@ directory = os.path.dirname(os.path.realpath(__file__))
 paramFile = str(directory) + "/params.txt"
 configFile = str(directory) + "/config.txt"
 
-params = np.loadtxt(paramFile, dtype=int, converters=float)
+params = np.loadtxt(paramFile, dtype=float, converters=float)
 config = np.loadtxt(configFile, dtype=str)
 
 # Unpacking the parameter file
@@ -32,6 +32,12 @@ beta = params[12]
 boxDims = [params[13], params[14], params[15]]
 tempFactor = params[16]
 
+# Defining the code units
+uMass = 1.991e33    # grams
+uDist = 1e17        # cm
+uVelo = 36447.2682  # cm/s
+uEner = 2.64485e42  # ergs
+
 #######################
 # Grid type selection #
 #######################
@@ -41,18 +47,26 @@ print("Creating particle grid points")
 initTime = time()
 
 # Uniform particle grid setups
-if config[0] == "boxGrid" or config[0] == "sphereGrid":
+if config[0] == "boxGrid":
     from boxCreation import boxGrid
 
     # Creating a box grid
     pos, ngas, bounds, volume = boxGrid(ngas, bounds)
 
     # Running the spherical cut module if sphere selected
-    if config[0] == "sphereGrid":
-        from shapeTypes import sphericalCloud
+elif config[0] == "sphereGrid":
+    # Import modules for the box and then spherical grid
+    from boxCreation import boxGrid
+    from shapeTypes import sphericalCloud
 
-        # Creating spherical grid
-        ngas, pos, volume = sphericalCloud(pos, radius, ngas, bounds)
+    # Increase ngas as we will lose some particles when cutting out the sphere
+    ngas = int(ngas * 6 / np.pi)
+
+    # Creating a box grid
+    pos, ngas, bounds, volume = boxGrid(ngas, bounds)
+
+    # Creating spherical grid
+    ngas, pos, volume = sphericalCloud(pos, radius, ngas, bounds)
 
 # Randomly placed particle setups
 elif config[0] == "boxRan":
@@ -71,6 +85,9 @@ elif config[0] == "sphereRan":
 gridFinTime = time()
 print("Particle grid created in {:.2f} s".format(gridFinTime-initTime))
 
+# Adjusting positions to be in cm
+pos = pos * 3.09e18
+
 ###########################
 # Mass and energy defines #
 ###########################
@@ -81,8 +98,14 @@ from massAndEnergy import thermalEnergy
 # Setting equal particle masses
 pMass = masses(ngas, totalMass)
 
+# Converting mass into grams
+pMass = pMass * 1.991e33 
+
 # Working out internal energy of each particle along with the sound speed
 pEnergy, cs = thermalEnergy(ngas, temperature, mu)
+
+# Converting energy into ergs 
+pEnergy = pEnergy * 1e7
 
 # Time taken for the energy and mass assignment
 mAndeTime = time()
@@ -91,7 +114,6 @@ print("Particle masses and energies calculated in {:.2f}".format(mAndeTime-gridF
 ################################
 # Velocities: Turbulence setup #
 ################################
-
 
 # Setup for turbulence from a velocity cube file
 if config[1] == "turbFile":
@@ -118,7 +140,7 @@ if config[1] == "turbFile":
 
 else:
     # Assgining an empty velocity array if no tubulence setup
-    vels = np.zeros((3, ngas))
+    vels = np.zeros((3, ngas), dtype=np.double)
 
 # Time taken for the turbulence/velocity setup
 turbTime = time()
@@ -143,7 +165,7 @@ else:
 ###################################
 
 # Assigning each particle an ID from 0 to the max number of particles
-pIDs = np.linspace(0, ngas, ngas, dtype=int)
+pIDs = np.linspace(0, ngas, ngas, dtype=np.int32)
 
 ################################
 # Low density particle padding #
@@ -170,6 +192,16 @@ else:
 padTime = time()
 print("Box padded with low density particles in {:.2f} s".format(padTime-turbTime))
 
+############################################
+# Conversion of quantities into code units #
+############################################
+
+# All variables should be in c.g.s units for conversion
+pos = pos / uDist
+vels = vels / uVelo
+pMass = pMass / uMass
+pEnergy = pEnergy / uEner
+
 ########################
 # File output to AREPO #
 ########################
@@ -188,6 +220,8 @@ else:
 # TESTING #
 ###########
 
+
+'''
 import matplotlib.pyplot as plt
 
 
@@ -206,11 +240,11 @@ ax.set_ylabel("y")
 ax.scatter(x2, y2, z2, s=1, color="red", )
 #plt.scatter(x[z==z[500]], y[z==z[500]], s=1, color="blue")
 #plt.scatter(x2[z2==z[500]], y2[z2==z[500]], s=1, color="red")
-#plt.show()
+plt.show()
 
 '''
 
-
+'''
 
 
 z = pos[2][:]

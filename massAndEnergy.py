@@ -10,7 +10,7 @@ def masses(ngas, totalMass):
     particleMass = totalMass / ngas
 
     # Set array of particle masses
-    pMass = np.ones(ngas) * particleMass
+    pMass = np.ones(ngas, dtype=np.double) * particleMass
 
     return pMass
 
@@ -23,6 +23,6 @@ def thermalEnergy(ngas, temperature, mu):
     cs = np.sqrt(energy * 2./3.)
 
     # Allocating this energy to each particle
-    pEnergy = np.ones(ngas) * energy
+    pEnergy = np.ones(ngas, dtype=np.double) * energy
 
     return pEnergy, cs

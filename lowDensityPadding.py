@@ -8,12 +8,12 @@ def padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
     nPaddingParticles = int(0.02 * ngas)
 
     # Create new arrays that are long enough for all the particles
-    newPos = np.zeros((3, nPaddingParticles))
-    newVels = np.zeros((3, nPaddingParticles))
-    newMass = np.zeros(nPaddingParticles)
-    newIDs = np.zeros(nPaddingParticles)
-    newEnergy = np.zeros(nPaddingParticles)
-    newRho = np.zeros(nPaddingParticles)
+    newPos = np.zeros((3, nPaddingParticles), dtype=np.double)
+    newVels = np.zeros((3, nPaddingParticles), dtype=np.double)
+    newMass = np.zeros(nPaddingParticles, dtype=np.double)
+    newIDs = np.zeros(nPaddingParticles, dtype=np.double)
+    newEnergy = np.zeros(nPaddingParticles, dtype=np.double)
+    newRho = np.zeros(nPaddingParticles, dtype=np.double)
 
     # Storing the old dimensions of our cloud
     xminOld = np.min(pos[0])
@@ -99,12 +99,12 @@ def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
     nPaddingParticles = int(0.02 * ngas)
 
     # Create new arrays that are long enough for all the particles
-    newPos = np.zeros((3, nPaddingParticles))
-    newVels = np.zeros((3, nPaddingParticles))
-    newMass = np.zeros(nPaddingParticles)
-    newIDs = np.zeros(nPaddingParticles)
-    newEnergy = np.zeros(nPaddingParticles)
-    newRho = np.zeros(nPaddingParticles)
+    newPos = np.zeros((3, nPaddingParticles), dtype=np.double)
+    newVels = np.zeros((3, nPaddingParticles), dtype=np.double)
+    newMass = np.zeros(nPaddingParticles, dtype=np.double)
+    newIDs = np.zeros(nPaddingParticles, dtype=np.double)
+    newEnergy = np.zeros(nPaddingParticles, dtype=np.double)
+    newRho = np.zeros(nPaddingParticles, dtype=np.double)
 
     # Append these new arrays to the end of our old ones
     pos = np.append(pos, newPos, axis=1)

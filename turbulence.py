@@ -140,6 +140,10 @@ def scaleVelocities(ngas, vels, pMass, radnorm, epsilon):
     vels[1] = vels[1] - velycom
     vels[2] = vels[2] - velzcom
 
+    # Doing some unit conversions
+    #mass = pMass * 1.99e30 #kg
+    #radnorm = radnorm * 3.09e16 #m
+
     # Finding the total kinetic energy of the cloud
     absVel = vels[0]**2 + vels[1]**2 + vels[2]**2
     rootMeanSquared = np.sum(absVel)
@@ -182,7 +186,7 @@ def boxGridTurbulence(velx, vely, velz, pos, pMass, gridSize, epsilon):
     deli = radnorm / gridSize  
 
     # Creating velocity arrays for the particles
-    vels = np.zeros((3, ngas), dtype=np.float64)
+    vels = np.zeros((3, ngas), dtype=np.double)
 
     # Interpolating the velocities ## BOX GRID METHOD
     vels = turbLoopBox(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli)
@@ -216,7 +220,7 @@ def sphericalGridTurbulence(velx, vely, velz, pos, pMass, gridSize, epsilon):
     deli = radnorm/(gridSize/2)
 
     # Creating velocity arrays for the particles
-    vels = np.zeros((3, ngas), dtype=np.float64)
+    vels = np.zeros((3, ngas), dtype=np.double)
 
     # Interpolating velocities with the spherical method
     vels = turbLoopSphere(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli)

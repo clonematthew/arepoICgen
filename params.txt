@@ -7,30 +7,29 @@
 #######################
 
 # Number of particles [no units]
-2097152
-#20000
+100000
 
 # Min x, max x, min y, max y, min z, max z [pc]
--64
-64     
--64     
-64 
--64     
-64 
+-0.12
+0.12  
+-0.12     
+0.12 
+-0.12     
+0.12 
 
 # Spherical cloud radius [pc]
 ## Leave value in even if not using ##
-64                                 
+0.12                               
 
 # Total mass of the cloud [Msun]
-1000
+25
 
 ###################
 # Thermal Physics #
 ###################
 
 # Temperature of the cloud [K]
-10                           
+15                        
 
 # Mean molecular weight of the cloud [no units]
 1.4                                  
@@ -43,7 +42,7 @@
 ####################
 
 # Beta parameter, ratio of rotational KE to GPE [no units]
-5
+2
 
 ####################
 # Box Padding Info #

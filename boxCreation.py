@@ -45,7 +45,7 @@ def boxGrid(ngas, bounds):
     ngas = nx * ny * nz
 
     # Creating arrays for the particles
-    pos = np.zeros((3, ngas))
+    pos = np.zeros((3, ngas), dtype=np.double)
 
     # Looping through every particle and assigning its position
     pos = tripleLoop(nx, ny, nz, pos, xmin, ymin, zmin, spacing)
