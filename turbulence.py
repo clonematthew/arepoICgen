@@ -186,7 +186,7 @@ def boxGridTurbulence(velx, vely, velz, pos, pMass, gridSize, epsilon):
     deli = radnorm / gridSize  
 
     # Creating velocity arrays for the particles
-    vels = np.zeros((3, ngas), dtype=np.double)
+    vels = np.zeros((3, ngas), dtype=np.float64)
 
     # Interpolating the velocities ## BOX GRID METHOD
     vels = turbLoopBox(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli)

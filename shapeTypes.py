@@ -25,7 +25,7 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
     zcom = zmin + dz/2
 
     # Only keeping the particles within the spherical region
-    newPos = np.zeros((3, ngas), dtype=np.double)
+    newPos = np.zeros((3, ngas), dtype=np.float64)
     ngasNew = 0
 
     for i in range(ngas):
@@ -43,7 +43,7 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
             ngasNew += 1
 
     # Reallocating the position array
-    pos = np.zeros((3, ngasNew), dtype=np.double)
+    pos = np.zeros((3, ngasNew), dtype=np.float64)
     pos[0] = newPos[0,0:ngasNew]
     pos[1] = newPos[1,0:ngasNew]
     pos[2] = newPos[2,0:ngasNew]

@@ -7,15 +7,15 @@
 #######################
 
 # Number of particles [no units]
-100000
+1000000
 
 # Min x, max x, min y, max y, min z, max z [pc]
--0.12
-0.12  
--0.12     
-0.12 
--0.12     
-0.12 
+0
+0.24  
+0     
+0.24 
+0     
+0.24 
 
 # Spherical cloud radius [pc]
 ## Leave value in even if not using ##

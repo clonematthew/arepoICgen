@@ -140,7 +140,7 @@ if config[1] == "turbFile":
 
 else:
     # Assgining an empty velocity array if no tubulence setup
-    vels = np.zeros((3, ngas), dtype=np.double)
+    vels = np.zeros((3, ngas), dtype=np.float64)
 
 # Time taken for the turbulence/velocity setup
 turbTime = time()
@@ -165,7 +165,7 @@ else:
 ###################################
 
 # Assigning each particle an ID from 0 to the max number of particles
-pIDs = np.linspace(0, ngas, ngas, dtype=np.int32)
+pIDs = np.linspace(1, ngas+1, ngas, dtype=np.int32)
 
 ################################
 # Low density particle padding #
@@ -191,6 +191,23 @@ else:
 # Time taken to pad the box 
 padTime = time()
 print("Box padded with low density particles in {:.2f} s".format(padTime-turbTime))
+
+#############################
+# Making positions positive #
+#############################
+
+# Getting the minimum value of every coordinate
+minx = np.min(pos[0])
+miny = np.min(pos[1])
+minz = np.min(pos[2])
+
+# Shifting everything if its less than zero
+if minx < 0:
+    pos[0] -= minx
+if miny < 0:
+    pos[1] -= miny
+if minz < 0:
+    pos[2] -= minz
 
 ############################################
 # Conversion of quantities into code units #
@@ -220,8 +237,6 @@ else:
 # TESTING #
 ###########
 
-
-'''
 import matplotlib.pyplot as plt
 
 
@@ -242,7 +257,7 @@ ax.scatter(x2, y2, z2, s=1, color="red", )
 #plt.scatter(x2[z2==z[500]], y2[z2==z[500]], s=1, color="red")
 plt.show()
 
-'''
+
 
 '''
 

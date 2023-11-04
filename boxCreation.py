@@ -45,7 +45,7 @@ def boxGrid(ngas, bounds):
     ngas = nx * ny * nz
 
     # Creating arrays for the particles
-    pos = np.zeros((3, ngas), dtype=np.double)
+    pos = np.zeros((3, ngas), dtype=np.float64)
 
     # Looping through every particle and assigning its position
     pos = tripleLoop(nx, ny, nz, pos, xmin, ymin, zmin, spacing)
@@ -74,7 +74,7 @@ def boxRandom(ngas, bounds):
     zmax = bounds[5]
     
     # Creating the particle array
-    pos = np.zeros((3, ngas))
+    pos = np.zeros((3, ngas), dtype=np.float64)
 
     # Calculating volume
     volume = (xmax-xmin) * (ymax-ymin) * (zmax-zmin)
