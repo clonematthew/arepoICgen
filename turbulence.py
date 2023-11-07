@@ -140,10 +140,6 @@ def scaleVelocities(ngas, vels, pMass, radnorm, epsilon):
     vels[1] = vels[1] - velycom
     vels[2] = vels[2] - velzcom
 
-    # Doing some unit conversions
-    #mass = pMass * 1.99e30 #kg
-    #radnorm = radnorm * 3.09e16 #m
-
     # Finding the total kinetic energy of the cloud
     absVel = vels[0]**2 + vels[1]**2 + vels[2]**2
     rootMeanSquared = np.sum(absVel)

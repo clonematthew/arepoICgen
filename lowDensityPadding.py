@@ -7,6 +7,8 @@ def padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
     # Use 2% of the number of particles to pad the box 
     nPaddingParticles = int(0.02 * ngas)
 
+    print("Padding the box with %s new particles" % nPaddingParticles)
+
     # Create new arrays that are long enough for all the particles
     newPos = np.zeros((3, nPaddingParticles), dtype=np.float64)
     newVels = np.zeros((3, nPaddingParticles), dtype=np.float64)
@@ -86,7 +88,7 @@ def padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
             pos[0,pID] = xTry
             pos[1,pID] = yTry
             pos[2,pID] = zTry
-            pIDs[pID] = pID + 2
+            pIDs[pID] = pID + 1
             pEnergy[pID] = pEnergy[0] * tempFactor
             pMass[pID] = newParticleMass
             pRho[pID] = 0.01 * cloudDensity
@@ -162,7 +164,7 @@ def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
             pos[0,pID] = xTry
             pos[1,pID] = yTry
             pos[2,pID] = zTry
-            pIDs[pID] = pID + 2
+            pIDs[pID] = pID + 1
             pEnergy[pID] = pEnergy[0] * tempFactor
             pMass[pID] = newParticleMass
             pRho[pID] = 0.01 * cloudDensity

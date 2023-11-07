@@ -21,7 +21,7 @@ params = np.loadtxt(paramFile, dtype=float, converters=float)
 config = np.loadtxt(configFile, dtype=str)
 
 # Unpacking the parameter file
-ngas = params[0]
+ngas = int(params[0])
 bounds = [params[1], params[2], params[3], params[4], params[5], params[6]]
 radius = params[7]
 totalMass = params[8]
@@ -36,15 +36,11 @@ tempFactor = params[16]
 uMass = 1.991e33    # grams
 uDist = 1e17        # cm
 uVelo = 36447.2682  # cm/s
-uEner = 2.64485e42  # ergs
+uEner = 1.328e9     # ergs
 
 #######################
 # Grid type selection #
 #######################
-
-# Tracking how long each section takes to run
-print("Creating particle grid points")
-initTime = time()
 
 # Uniform particle grid setups
 if config[0] == "boxGrid":
@@ -81,10 +77,6 @@ elif config[0] == "sphereRan":
     # Creating a random spherical grid
     pos, volume = sphereRandom(ngas, radius)
 
-# Time taken for the grid setup
-gridFinTime = time()
-print("Particle grid created in {:.2f} s".format(gridFinTime-initTime))
-
 # Adjusting positions to be in cm
 pos = pos * 3.09e18
 
@@ -107,10 +99,6 @@ pEnergy, cs = thermalEnergy(ngas, temperature, mu)
 # Converting energy into ergs 
 pEnergy = pEnergy * 1e7
 
-# Time taken for the energy and mass assignment
-mAndeTime = time()
-print("Particle masses and energies calculated in {:.2f}".format(mAndeTime-gridFinTime))
-
 ################################
 # Velocities: Turbulence setup #
 ################################
@@ -123,28 +111,25 @@ if config[1] == "turbFile":
     # Loading in the turbulent velocities from the velocity cube
     velx, vely, velz = turbulenceFromFile(int(config[3]), config[2])
 
-    if config[0] == "boxGrid":
+    # Branch for the box scenarios
+    if config[0] == "boxGrid" or config[0] == "boxRan":
         from turbulence import boxGridTurbulence
 
         # Interpolating and assignning velocities
         vels = boxGridTurbulence(velx, vely, velz, pos, pMass, int(config[3]), epsilon)
 
-    elif config[0] == "sphereGrid":
+    # Branch for the spherical scenarios
+    elif config[0] == "sphereGrid" or config[0] == "sphereRan":
         from turbulence import sphericalGridTurbulence
 
         # Interpolating and assigning velocities
         vels = sphericalGridTurbulence(velx, vely, velz, pos, pMass, int(config[3]), epsilon)
-    
     else:
         pass
 
 else:
     # Assgining an empty velocity array if no tubulence setup
     vels = np.zeros((3, ngas), dtype=np.float64)
-
-# Time taken for the turbulence/velocity setup
-turbTime = time()
-print("Turbulent velocities assigned in {:.2f}".format(turbTime-mAndeTime))
 
 ########################
 # Velocities: Rotation #
@@ -164,8 +149,8 @@ else:
 # Setting particle identification #
 ###################################
 
-# Assigning each particle an ID from 0 to the max number of particles
-pIDs = np.linspace(1, ngas+1, ngas, dtype=np.int32)
+# Assigning each particle an ID from 1 to the max number of particles
+pIDs = np.linspace(1, ngas, ngas, dtype=np.int32)
 
 ################################
 # Low density particle padding #
@@ -173,24 +158,25 @@ pIDs = np.linspace(1, ngas+1, ngas, dtype=np.int32)
 
 # Setup for padding the box with low density particles
 if config[5] == "True":
+    # Branch for the box setups
     print("Padding box with low density particles")
-    if config[0] == "boxGrid":
+    if config[0] == "boxGrid" or config[0] == "boxRan":
         from lowDensityPadding import padBox
 
         # Pad the box with low density particles outside the box grid
         pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padBox(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor)
     
-    elif config[0] == "sphereGrid":
+    # Branch for the spherical setups
+    elif config[0] == "sphereGrid" or config[0] == "sphereRan":
         from lowDensityPadding import padSphere
 
         # Pad the box with low density particles outside the spherical cloud
         pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor)
+    else:
+        ngasAll = ngas
 else:
+    ngasAll = ngas
     pass
-
-# Time taken to pad the box 
-padTime = time()
-print("Box padded with low density particles in {:.2f} s".format(padTime-turbTime))
 
 #############################
 # Making positions positive #
@@ -255,7 +241,7 @@ ax.set_ylabel("y")
 ax.scatter(x2, y2, z2, s=1, color="red", )
 #plt.scatter(x[z==z[500]], y[z==z[500]], s=1, color="blue")
 #plt.scatter(x2[z2==z[500]], y2[z2==z[500]], s=1, color="red")
-plt.show()
+#plt.show()
 
 
 

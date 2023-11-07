@@ -17,7 +17,7 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
     dz = zmax - zmin
 
     # Finding the radius of the central sphere
-    radius = abs(np.min([dx/2, dy/2, dz/2]))
+    radius = np.abs(np.min([dx/2, dy/2, dz/2]))
 
     # Fiding the central point
     xcom = xmin + dx/2
@@ -42,6 +42,10 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
             # Update the number of particles inside the sphere
             ngasNew += 1
 
+    # Printing the change in particles
+    print("Number originally in box: %s" % ngas)
+    print("Number left in sphere: %s" % ngasNew)
+
     # Reallocating the position array
     pos = np.zeros((3, ngasNew), dtype=np.float64)
     pos[0] = newPos[0,0:ngasNew]
@@ -51,8 +55,39 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
     # Scaling the cloud to the desired size
     pos = pos * (cloudSize/radius)
 
+    # Checking the size etc
+    xmin = np.min(pos[0])
+    xmax = np.max(pos[0])
+    ymin = np.min(pos[1])
+    ymax = np.max(pos[1])
+    zmin = np.min(pos[2])
+    zmax = np.max(pos[2])
+
+    # Printing the new limits
+    print("Sphere X Limits: {:.2f} - {:.2f}".format(xmin, xmax))
+    print("Sphere Y Limits: {:.2f} - {:.2f}".format(ymin, ymax))
+    print("Sphere Z Limits: {:.2f} - {:.2f}".format(zmin, zmax))
+
+    # Getting box sizes
+    dx = xmax - xmin
+    dy = ymax - ymin
+    dz = zmax - zmin
+
+    # Finding the radius of the central sphere
+    radius = np.abs(np.min([dx/2, dy/2, dz/2]))
+
+    # Fiding the central point
+    xcom = xmin + dx/2
+    ycom = ymin + dy/2
+    zcom = zmin + dz/2
+    
     # Calculating the volume
     volume = (4. * np.pi /3.) * radius**3
+
+    # Printing sphere information
+    print("Radius of the sphere: {:.2f}".format(radius))
+    print("Sphere COM: {:.2f},{:.2f},{:.2f}".format(xcom, ycom, zcom))
+    print("Sphere volume: {:.2e}".format(volume))
 
     return ngasNew, pos, volume
 

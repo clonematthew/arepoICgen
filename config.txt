@@ -11,7 +11,7 @@
 # sphereRan  = Sphere of randomly spaced particles
 # sphereGrid = Spherical volume cut of an evenly spaced grid of particles
 
-sphereGrid
+sphereRan
 
 ####################
 # Turbulence setup #
@@ -37,7 +37,7 @@ vel3D.bin
 # rotation = Add rotation to the body
 # static   = No body rotation
 
-rotation
+static
 
 #######################
 # Low Density Padding #

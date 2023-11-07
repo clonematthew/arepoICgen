@@ -7,22 +7,22 @@
 #######################
 
 # Number of particles [no units]
-1000000
+100
 
 # Min x, max x, min y, max y, min z, max z [pc]
 0
-0.24  
+50 
 0     
-0.24 
+50 
 0     
-0.24 
+50 
 
 # Spherical cloud radius [pc]
 ## Leave value in even if not using ##
-0.12                               
+2                      
 
 # Total mass of the cloud [Msun]
-25
+1000
 
 ###################
 # Thermal Physics #
@@ -49,9 +49,9 @@
 ####################
 
 # The x, y and z size of the box around the cloud, multiples of the cloud size [pc]
-2
-2
-2
+2.5
+2.5
+2.5
 
 # How much hotter these particles should be compared to the cloud [no units]
 2
