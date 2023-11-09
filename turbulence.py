@@ -141,7 +141,7 @@ def scaleVelocities(ngas, vels, pMass, radnorm, epsilon):
     vels[2] = vels[2] - velzcom
 
     # Finding the total kinetic energy of the cloud
-    absVel = vels[0]**2 + vels[1]**2 + vels[2]**2
+    absVel = (vels[0]**2 + vels[1]**2 + vels[2]**2) * (36447 * 10000)**2
     rootMeanSquared = np.sum(absVel)
     eKinetic = np.sum(absVel*pMass*0.5)
 

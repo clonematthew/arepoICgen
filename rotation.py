@@ -4,7 +4,7 @@ import numpy as np
 # Function to add solid body rotation
 def addRotation(pos, pMass, vels, beta):
     # Find the centre of mass of the body
-    mtot = np.sum(pMass)
+    mtot = np.sum(pMass) 
     xcom = np.sum(pMass * pos[0]) / mtot
     ycom = np.sum(pMass * pos[1]) / mtot
     zcom = np.sum(pMass * pos[2]) / mtot
@@ -33,4 +33,4 @@ def addRotation(pos, pMass, vels, beta):
     # Reporting the deviation from the desired beta value
     print("Difference from desired beta: {:.1f}%".format(abs(100*(beta-eRot/eGrav)/beta)))
 
-    return vels
+    return vels / 1000

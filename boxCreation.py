@@ -109,6 +109,9 @@ def sphereRandom(ngas, radius):
     # Calculating volume
     volume = (radius**3) *  (4. * np.pi) / 3.
 
+    # Printing values
+    print("Spherical Volume: {:.2e}".format(volume))
+
     # Allocating positions
     i = 0
     while i < ngas:
@@ -128,6 +131,19 @@ def sphereRandom(ngas, radius):
                 i += 1
             else:
                 pass
+
+    # Setting the max dimensions to the maximum particle positions 
+    xmin = np.min(pos[0])
+    xmax = np.max(pos[0])
+    ymin = np.min(pos[1])
+    ymax = np.max(pos[1])
+    zmin = np.min(pos[2])
+    zmax = np.max(pos[2]) 
+
+    # Printing the new limits
+    print("New X Limits: {:.2f} - {:.2f}".format(xmin, xmax))
+    print("New Y Limits: {:.2f} - {:.2f}".format(ymin, ymax))
+    print("New Z Limits: {:.2f} - {:.2f}".format(zmin, zmax))
 
     return pos, volume
 

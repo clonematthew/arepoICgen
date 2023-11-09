@@ -173,7 +173,3 @@ def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
             pass
 
     return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)
-
-
-
-

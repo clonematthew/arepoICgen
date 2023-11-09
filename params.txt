@@ -7,7 +7,7 @@
 #######################
 
 # Number of particles [no units]
-100
+100000
 
 # Min x, max x, min y, max y, min z, max z [pc]
 0
@@ -19,10 +19,10 @@
 
 # Spherical cloud radius [pc]
 ## Leave value in even if not using ##
-2                      
+3.708                      
 
 # Total mass of the cloud [Msun]
-1000
+25
 
 ###################
 # Thermal Physics #
@@ -48,7 +48,7 @@
 # Box Padding Info #
 ####################
 
-# The x, y and z size of the box around the cloud, multiples of the cloud size [pc]
+# The x, y and z size of the box around the cloud, multiples of the cloud size [no units]
 2.5
 2.5
 2.5

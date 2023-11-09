@@ -11,7 +11,7 @@
 # sphereRan  = Sphere of randomly spaced particles
 # sphereGrid = Spherical volume cut of an evenly spaced grid of particles
 
-sphereRan
+boxGrid
 
 ####################
 # Turbulence setup #
@@ -37,7 +37,7 @@ vel3D.bin
 # rotation = Add rotation to the body
 # static   = No body rotation
 
-static
+rotation
 
 #######################
 # Low Density Padding #
@@ -53,5 +53,6 @@ True
 ###############
 
 # arepo = Output a type 2 arepo datafile
+# hdf5  = Output a hdf5 (type 3) datafile
 
-arepo
+hdf5
