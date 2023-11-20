@@ -141,18 +141,14 @@ def scaleVelocities(ngas, vels, pMass, radnorm, epsilon):
     vels[2] = vels[2] - velzcom
 
     # Finding the total kinetic energy of the cloud
-    absVel = (vels[0]**2 + vels[1]**2 + vels[2]**2) * (36447 * 10000)**2
-    rootMeanSquared = np.sum(absVel)
-    eKinetic = np.sum(absVel*pMass*0.5)
+    absVel = (vels[0]**2 + vels[1]**2 + vels[2]**2)
+    eKinetic = np.sum(absVel * pMass * 0.5)
 
     # Calculate the gravitational potential of the cloud
-    ePotential = (3/5) * mtot * mtot / radnorm
-
-    # Calculate the root mean squared speed of the cloud
-    rootMeanSquared = np.sqrt(rootMeanSquared / ngas)
+    ePotential = 6.67e-8 * (3/5) * mtot * mtot / radnorm
 
     ## FOR SCALING BY VIRIAL EQUILIBRIUM
-    scalingFactor = (ePotential/eKinetic) / epsilon
+    scalingFactor = np.sqrt((ePotential/eKinetic) / epsilon)
 
     # Scaling velocities
     vels = vels * scalingFactor

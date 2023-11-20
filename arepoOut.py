@@ -73,7 +73,7 @@ def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
     f.write_record(np.float64(pMass))
 
 # Function to output hdf5 files
-def hdf5out(ngas, pos, vels, pIDs, pMass, pEnergy):
+def hdf5out(ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0):
     # Opening the ic file
     with h5py.File("ics.hdf5", "w") as icFile:
         # Creating the hdf5 groups
@@ -127,7 +127,14 @@ def hdf5out(ngas, pos, vels, pIDs, pMass, pEnergy):
         # Writing the data of the particles
         part0.create_dataset("ParticleIDs", data=pIDs)
         part0.create_dataset("Coordinates", data=writePos)
-        part0.create_dataset("Masses", data=pMass)
         part0.create_dataset("Velocities", data=writeVels)
         part0.create_dataset("InternalEnergy", data=pEnergy)
+
+        # Writing out masses or density based on config
+        if density == False:
+            # Writing out masses
+            part0.create_dataset("Masses", data=pMass)
+        elif density == True:
+            # Writing out densities
+            part0.create_dataset("Masses", data=pDensity)
 

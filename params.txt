@@ -11,15 +11,15 @@
 
 # Min x, max x, min y, max y, min z, max z [pc]
 0
-50 
+0.3
 0     
-50 
-0     
-50 
+0.3
+0    
+0.3 
 
 # Spherical cloud radius [pc]
 ## Leave value in even if not using ##
-3.708                      
+0.12
 
 # Total mass of the cloud [Msun]
 25
@@ -55,3 +55,12 @@
 
 # How much hotter these particles should be compared to the cloud [no units]
 2
+
+###################
+# Desired Density #
+###################
+
+# The desired number density of the cloud [cm^-3]
+# Has to be consistent with the mass we've given above 
+
+1e5

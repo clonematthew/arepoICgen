@@ -11,7 +11,7 @@
 # sphereRan  = Sphere of randomly spaced particles
 # sphereGrid = Spherical volume cut of an evenly spaced grid of particles
 
-boxGrid
+sphereRan
 
 ####################
 # Turbulence setup #
@@ -52,7 +52,12 @@ True
 # File Output #
 ###############
 
-# arepo = Output a type 2 arepo datafile
+# arepo = Output a type 2 arepo datafile (broken)
 # hdf5  = Output a hdf5 (type 3) datafile
 
 hdf5
+
+# masses = Output masses
+# density = Output denisty as masses
+
+density

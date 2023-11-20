@@ -29,6 +29,7 @@ epsilon = params[11]
 beta = params[12]
 boxDims = [params[13], params[14], params[15]]
 tempFactor = params[16]
+densityTarget = params[17]
 
 # Defining the code units
 uMass = 1.991e33    # grams
@@ -124,7 +125,6 @@ if config[1] == "turbFile":
         vels = sphericalGridTurbulence(velx, vely, velz, pos, pMass, int(config[3]), epsilon)
     else:
         pass
-
 else:
     # Assgining an empty velocity array if no tubulence setup
     vels = np.zeros((3, ngas), dtype=np.float64)
@@ -203,6 +203,20 @@ vels = vels / uVelo
 pMass = pMass / uMass
 pEnergy = pEnergy / uEner
 
+##############################
+# Desired Density Conversion #
+##############################
+
+# Converting the number density to code units
+densityTarget = densityTarget * 1.4 * 1.66e-24 
+densityTarget = densityTarget / (uMass / (uDist**3))
+densityTargetPadding = densityTarget * 0.01
+
+# Creating density array
+pDensity = np.ones_like(pMass)
+pDensity[0:ngas] = densityTarget
+pDensity[ngas:-1] = densityTargetPadding
+
 ########################
 # File output to AREPO #
 ########################
@@ -212,7 +226,13 @@ print("Writing output file")
 if config[6] == "hdf5":
     from arepoOut import hdf5out
 
-    # Write the particle data as a hdf5 file
-    hdf5out(ngasAll, pos, vels, pIDs, pMass, pEnergy)
+    # Writing masses to mass 
+    if config[7] == "masses":
+        # Write the particle data as a hdf5 file
+        hdf5out(ngasAll, pos, vels, pIDs, pMass, pEnergy)
+    # Writing density to mass
+    elif config[7] == "density":
+        # Writing particle data as a hdf5 file
+        hdf5out(ngasAll, pos, vels, pIDs, pMass, pEnergy, True, pDensity)
 else:
     print("Fortran binary version is broken, sorry </3")
