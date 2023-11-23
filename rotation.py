@@ -16,14 +16,14 @@ def addRotation(pos, pMass, vels, beta):
     rMax = np.max([xmax, ymax, zmax]) 
 
     # Working out rotational velocity
-    omega = np.sqrt(3. * beta * mtot / (rMax**3))
+    omega = np.sqrt(6.67e-8 * 3. * beta * mtot / (rMax**3))
 
     # Adding the rotation to the x and y velocities, rotating about the z axis
     vels[0] -= omega * (pos[1] - ycom)
     vels[1] += omega * (pos[0] - xcom)
 
     # Working out gravitational potential energy
-    eGrav = (3./5.) * (mtot**2) / rMax
+    eGrav = (6.67e-8) * (3./5.) * (mtot**2) / rMax
     
     # Working out rotational kinetic energy
     r = (pos[0] - xcom)**2 + (pos[1] - ycom)**2
@@ -33,4 +33,4 @@ def addRotation(pos, pMass, vels, beta):
     # Reporting the deviation from the desired beta value
     print("Difference from desired beta: {:.1f}%".format(abs(100*(beta-eRot/eGrav)/beta)))
 
-    return vels / 1000
+    return vels #/ 1000

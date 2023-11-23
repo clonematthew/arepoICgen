@@ -60,4 +60,4 @@ hdf5
 # masses = Output masses
 # density = Output denisty as masses
 
-density
+masses
