@@ -16,7 +16,7 @@ def addRotation(pos, pMass, vels, beta):
     rMax = np.max([xmax, ymax, zmax]) 
 
     # Working out rotational velocity
-    omega = np.sqrt( 6.673-8 * 3. * beta * mtot / (rMax**3))
+    omega = np.sqrt( 6.673e-8 * 3. * beta * mtot / (rMax**3))
 
     # Adding the rotation to the x and y velocities, rotating about the z axis
     vels[0] -= omega * (pos[1] - ycom)
