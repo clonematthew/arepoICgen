@@ -42,7 +42,7 @@
 ####################
 
 # Beta parameter, ratio of rotational KE to GPE [no units]
-2
+0.0001
 
 ####################
 # Box Padding Info #
