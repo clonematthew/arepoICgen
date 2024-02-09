@@ -229,10 +229,11 @@ if config[6] == "hdf5":
     # Writing masses to mass 
     if config[7] == "masses":
         # Write the particle data as a hdf5 file
+        hdf5out(config[8], ngasAll, pos, vels, pIDs, pMass, pEnergy)
+
     # Writing density to mass
-        hdf5out(ngasAll, pos, vels, pIDs, pMass, pEnergy)
     elif config[7] == "density":
-        # Writing particle data as a hdf5 file
-        hdf5out(ngasAll, pos, vels, pIDs, pMass, pEnergy, True, pDensity)
+        # Write the particle data as a hdf5 file
+        hdf5out(config[8], ngasAll, pos, vels, pIDs, pMass, pEnergy, True, pDensity)
 else:
     print("Fortran binary version is broken, sorry </3")

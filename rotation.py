@@ -24,13 +24,12 @@ def addRotation(pos, pMass, vels, beta):
 
     # Working out gravitational potential energy
     eGrav = (6.67e-8) * (3./5.) * (mtot**2) / rMax
-    
-    # Working out rotational kinetic energy
-    r = (pos[0] - xcom)**2 + (pos[1] - ycom)**2
-    vRot = (pos[0] - xcom) * vels[1] - (pos[1] - ycom) * vels[0]
-    eRot = np.sum(0.5 * pMass * vRot * vRot / r)
+ 
+    # Working out the rotational energy
+    momentOfInteria = (2/5) * mtot * rMax**2
+    eRot = (1/2) * momentOfInteria * omega**2
 
     # Reporting the deviation from the desired beta value
-    print("Difference from desired beta: {:.1f}%".format(abs(100*(beta-eRot/eGrav)/beta)))
+    print("Difference from desired beta: {:.2f}%".format(abs(100*(beta-eRot/eGrav)/beta)))
 
     return vels

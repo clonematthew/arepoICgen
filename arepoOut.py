@@ -51,10 +51,7 @@ def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
                    nPartHW, entropyicFlag, doublePrescisionFlag, lptICsFlag, lptScalingFactor, 
                    tracerFieldFlag, compositionVectorLength, unused)
     
-    # Writing out the positions]
-    print(pos[0])
-    print(pos[1])
-    print(pos[2])
+    # Writing out the positions
     f.write_record(np.float64(pos.T))
 
     # Writing out the velocities
@@ -73,9 +70,12 @@ def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
     f.write_record(np.float64(pMass))
 
 # Function to output hdf5 files
-def hdf5out(ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0):
+def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0):
+    # Setup file name
+    name = str(filename) + ".hdf5"
+
     # Opening the ic file
-    with h5py.File("ics.hdf5", "w") as icFile:
+    with h5py.File(name, "w") as icFile:
         # Creating the hdf5 groups
         header = icFile.create_group("Header")
         part0 = icFile.create_group("PartType0")

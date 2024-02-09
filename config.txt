@@ -24,7 +24,7 @@ static
 
 # Turbulent velocity filename ## leave as is if not using ##
 
-vel3D.bin
+./turbulenceGrids/naturalVel3D1.bin
 
 # Size of the turbulent velocity cube grid ## leave as if it not using ##
 
@@ -37,7 +37,7 @@ vel3D.bin
 # rotation = Add rotation to the body
 # static   = No body rotation
 
-rotation 
+rotation
 
 #######################
 # Low Density Padding #
@@ -61,3 +61,7 @@ hdf5
 # density = Output denisty as masses
 
 masses
+
+# filename = Name you want the file to be called (no need for extension)
+
+beta3
