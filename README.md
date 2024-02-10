@@ -143,7 +143,7 @@ Only needed if outputting density as mass.
 
 An example config and parameter setup might look like below, for a uniform sphere of gas with rotation only:
 
-`
+```
 config = {
     "grid": "sphereGrid",
     "turbulence": "static",
@@ -164,4 +164,5 @@ params = {
     "beta": 3,
     "boxDims": [5, 5, 5],
     "tempFactor": 2
-}`
+}
+```
