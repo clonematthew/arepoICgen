@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.io import FortranFile
 import h5py
+import os
 
 # Function to export the created particle data to a usable arepo file
 def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
@@ -71,8 +72,11 @@ def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
 
 # Function to output hdf5 files
 def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0):
+    # Get path to directory
+    dir_path = os.path.dirname(os.path.realpath(__name__))
+    
     # Setup file name
-    name = "./" + str(filename) + ".hdf5"
+    name = dir_path + "/"+ str(filename) + ".hdf5"
 
     # Opening the ic file
     with h5py.File(name, "w") as icFile:
