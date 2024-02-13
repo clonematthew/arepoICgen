@@ -11,8 +11,11 @@ The config options are needed for all runs, but some parameters are only needed 
 ######################
 
 boxGrid    = Box of particles in an evenly spaced grid
+
 boxRan     = Box of randomly spaced particles
+
 sphereRan  = Sphere of randomly spaced particles
+
 sphereGrid = Spherical volume cut of an evenly spaced grid of particles
 
 "grid": *grid type*
@@ -22,6 +25,7 @@ sphereGrid = Spherical volume cut of an evenly spaced grid of particles
 ####################
 
 turbFile = Turbulence from a 3D velocity cube file
+
 static   = No turbulent velocities
 
 "turbulence": *turbulence type*
@@ -29,6 +33,7 @@ static   = No turbulent velocities
 If using turbFile, need to include a turbulence file along with its grid size:
 
 "turbFile": *path/to/file*
+
 "turbSize": *Size of the grid (64, 128, etc)*
 
 ##################
@@ -36,6 +41,7 @@ If using turbFile, need to include a turbulence file along with its grid size:
 ##################
 
 rotation = Add rotation to the body
+
 static   = No body rotation
 
 "rotation": *rotation type*
@@ -45,6 +51,7 @@ static   = No body rotation
 #######################
 
 True  = Pad the box outisde the cloud with low density particles
+
 False = ... don't
 
 "padding": *True/False*
@@ -54,11 +61,13 @@ False = ... don't
 ###############
 
 arepo = Output a type 2 arepo datafile (broken)
+
 hdf5  = Output a hdf5 (type 3) datafile
 
 "output": *file type*
 
 masses = Output masses
+
 density = Output denisty as masses
 
 "outVal": *output quantity*
@@ -82,6 +91,7 @@ Min x, max x, min y, max y, min z, max z [pc]
 "bounds": [*xmin, xmax, ymin, ymax, zmin, zmax*]
 
 Spherical cloud radius [pc] 
+
 Only needed for spherical setups.
 
 "radii": *cloud radius*
@@ -103,6 +113,7 @@ Mean molecular weight of the cloud [no units]
 "mu": *mu*                               
 
 Virial parameter, ratio of KE to GPE [no units]
+
 Only needed for clouds with turbulence. 
 
 "virialParam": *ratio*     
@@ -112,6 +123,7 @@ Only needed for clouds with turbulence.
 ####################
 
 Beta parameter, ratio of rotational KE to GPE [no units]
+
 Only needed for clouds with rotation.
 
 "beta": *beta value*
@@ -121,6 +133,7 @@ Only needed for clouds with rotation.
 ####################
 
 The x, y and z size of the box around the cloud, multiples of the cloud size [no units]
+
 Only needed when padding the box with low density particles. 
 
 "boxDims": [*x, y, z*]
@@ -134,7 +147,9 @@ How much hotter these particles should be compared to the cloud [no units]
 ###################
 
 The desired number density of the cloud [cm^-3]
+
 Has to be consistent with the mass we've given above 
+
 Only needed if outputting density as mass.
 
 "density": *rho*
@@ -143,7 +158,7 @@ Only needed if outputting density as mass.
 
 An example config and parameter setup might look like below, for a uniform sphere of gas with rotation only:
 
-`
+```
 config = {
     "grid": "sphereGrid",
     "turbulence": "static",
@@ -164,4 +179,5 @@ params = {
     "beta": 3,
     "boxDims": [5, 5, 5],
     "tempFactor": 2
-}`
+}
+```
