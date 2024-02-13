@@ -72,7 +72,7 @@ def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
 # Function to output hdf5 files
 def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0):
     # Setup file name
-    name = str(filename) + ".hdf5"
+    name = "./" + str(filename) + ".hdf5"
 
     # Opening the ic file
     with h5py.File(name, "w") as icFile:
