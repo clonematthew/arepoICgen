@@ -16,7 +16,7 @@ def generateICs(config, params):
 
     # Setting ngas
     ngas = int(params["ngas"])
-    
+
     #######################
     # Grid type selection #
     #######################
@@ -122,6 +122,15 @@ def generateICs(config, params):
         vels = addRotation(pos, pMass, vels, params["beta"])
     else:
         pass
+
+    #####################
+    # Special Functions #
+    #####################
+
+    # Add a Boss-Bodenheimer density perturbation
+    if config["special"] == "BB":
+        from .bossBodenheimer import bossBodenheimer
+        pos, pMass = bossBodenheimer(ngas, pos, pMass)
 
     ###################################
     # Setting particle identification #
