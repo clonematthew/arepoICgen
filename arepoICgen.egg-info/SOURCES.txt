@@ -2,6 +2,7 @@ README.md
 setup.py
 arepoICgen/__init__.py
 arepoICgen/arepoOut.py
+arepoICgen/bossBodenheimer.py
 arepoICgen/boxCreation.py
 arepoICgen/generateICs.py
 arepoICgen/lowDensityPadding.py
