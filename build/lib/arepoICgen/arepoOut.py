@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.io import FortranFile
 import h5py
+import os
 
 # Function to export the created particle data to a usable arepo file
 def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
@@ -70,9 +71,12 @@ def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
     f.write_record(np.float64(pMass))
 
 # Function to output hdf5 files
-def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0):
+def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0, bField=False):
+    # Get path to directory
+    dir_path = os.path.dirname(os.path.realpath(__name__))
+    
     # Setup file name
-    name = str(filename) + ".hdf5"
+    name = dir_path + "/"+ str(filename) + ".hdf5"
 
     # Opening the ic file
     with h5py.File(name, "w") as icFile:
@@ -138,3 +142,8 @@ def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDen
             # Writing out densities
             part0.create_dataset("Masses", data=pDensity)
 
+        # Writing out magnetic field info based on config
+        if bField == True:
+            # Writing out magnetic field info
+            part0.create_dataset("MagneticField", data=np.zeros_like(pMass))
+            part0.create_dataset("MagneticFieldDivergence", data=np.zeros_like(pMass))

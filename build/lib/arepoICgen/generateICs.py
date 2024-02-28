@@ -123,6 +123,16 @@ def generateICs(config, params):
     else:
         pass
 
+    #####################
+    # Special Functions #
+    #####################
+
+    # Add a Boss-Bodenheimer density perturbation
+    if config["extras"] == "bossBodenheimer":
+        print("Adding Boss-Bodenheimer perturbation")
+        from .bossBodenheimer import bossBodenheimer
+        pos, pMass = bossBodenheimer(ngas, pos, pMass)
+
     ###################################
     # Setting particle identification #
     ###################################
@@ -210,11 +220,11 @@ def generateICs(config, params):
         # Writing masses to mass 
         if config["outValue"] == "masses":
             # Write the particle data as a hdf5 file
-            hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy)
+            hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, config["bField"])
 
         # Writing density to mass
         elif config["outValue"] == "density":
             # Write the particle data as a hdf5 file
-            hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, True, pDensity)
+            hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, True, pDensity, config["bField"])
     else:
         print("Fortran binary version is broken, sorry </3")
