@@ -18,7 +18,7 @@ def bossBodenheimer(ngas, pos, mass):
         y = yCom - pos[1,i]
 
         # Work out the angle 
-        phi = np.arctan2(y, x)
+        phi = np.arctan(y, x)
 
         # Work out what the mass should be here
         mass[i] = mRes * (1 + 0.5 * np.cos(2*phi))

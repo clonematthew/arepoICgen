@@ -225,6 +225,6 @@ def generateICs(config, params):
         # Writing density to mass
         elif config["outValue"] == "density":
             # Write the particle data as a hdf5 file
-            hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, True, pDensity, config["bField"])
+            hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, config["bField"], True, pDensity)
     else:
         print("Fortran binary version is broken, sorry </3")
