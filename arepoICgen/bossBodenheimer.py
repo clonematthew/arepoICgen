@@ -8,8 +8,6 @@ def bossBodenheimer(ngas, pos, mass):
     xCom = np.sum(pos[0] * mass) / totMass
     yCom = np.sum(pos[1] * mass) / totMass
 
-    # Get the mass resolution
-    mRes = totMass / ngas
 
     # Apply the density perturbation
     for i in range(ngas):
@@ -18,10 +16,11 @@ def bossBodenheimer(ngas, pos, mass):
         y = yCom - pos[1,i]
 
         # Work out the angle 
-        phi = np.arctan(y, x)
+        phi = np.arctan2(y, x)
 
         # Work out what the mass should be here
-        mass[i] = mRes * (1 + 0.5 * np.cos(2*phi))
-
+        mass[i] = mass[i] * (1 + 0.5 * np.cos(2*phi))
+        
     print("Boss-Bodenheimer Density Perturbation Applied")
+
     return pos, mass

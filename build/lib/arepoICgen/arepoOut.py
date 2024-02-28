@@ -71,7 +71,7 @@ def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
     f.write_record(np.float64(pMass))
 
 # Function to output hdf5 files
-def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0, bField=False):
+def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, bField, density=False, pDensity=0):
     # Get path to directory
     dir_path = os.path.dirname(os.path.realpath(__name__))
     
