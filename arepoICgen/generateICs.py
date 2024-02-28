@@ -129,6 +129,7 @@ def generateICs(config, params):
 
     # Add a Boss-Bodenheimer density perturbation
     if config["special"] == "BB":
+        print("Adding Boss-Bodenheimer perturbation")
         from .bossBodenheimer import bossBodenheimer
         pos, pMass = bossBodenheimer(ngas, pos, pMass)
 
