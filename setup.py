@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="arepoICgen",
-    version="0.02",
+    version="0.03",
     author="Matt Cusack",
     author_email="cusackmt@cardiff.ac.uk",
     description="Package for generating initial conditions for AREPO",

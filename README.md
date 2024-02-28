@@ -72,6 +72,12 @@ density = Output denisty as masses
 
 "outVal": *output quantity*
 
+True = Output a zero magnetic field for all particles [TESTING]
+
+False = Don't use magnetic field
+
+"bField": *magnetic field*
+
 filename = Name you want the file to be called (no need for extension)
 
 "filename": *filename*
@@ -166,6 +172,7 @@ config = {
     "padding": True,
     "output": "hdf5",
     "outValue": "masses",
+    "bField": False,
     "filename": "uniformSphere"
 }
 

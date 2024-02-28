@@ -71,7 +71,7 @@ def arepoOut(ngas, pos, vels, pIDs, pMass, pEnergy):
     f.write_record(np.float64(pMass))
 
 # Function to output hdf5 files
-def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0):
+def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDensity=0, bField=False):
     # Get path to directory
     dir_path = os.path.dirname(os.path.realpath(__name__))
     
@@ -142,3 +142,8 @@ def hdf5out(filename, ngas, pos, vels, pIDs, pMass, pEnergy, density=False, pDen
             # Writing out densities
             part0.create_dataset("Masses", data=pDensity)
 
+        # Writing out magnetic field info based on config
+        if bField == True:
+            # Writing out magnetic field info
+            part0.create_dataset("MagneticField", data=np.zeros_like(pMass))
+            part0.create_dataset("MagneticFieldDivergence", data=np.zeros_like(pMass))
