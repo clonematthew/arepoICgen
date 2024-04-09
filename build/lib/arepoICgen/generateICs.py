@@ -236,7 +236,7 @@ def generateICs(config, params):
         print("Fortran binary version is broken, sorry </3")
 
 # Function to just easily create a uniform sphere       
-def easySphere(mass, numDense, ngas, filename, mu=1.4):
+def easySphere(mass, numDense, ngas, filename, mu=1.4, beta=0.05):
     # Convert number density to density
     density = numDense * 1.66e-24 * mu
 
@@ -249,7 +249,7 @@ def easySphere(mass, numDense, ngas, filename, mu=1.4):
     config = {
         "grid": "sphereGrid",
         "turbulence": "static",
-        "rotation": "static",
+        "rotation": "rotation",
         "padding": True,
         "output": "hdf5",
         "outValue": "masses",
@@ -265,6 +265,7 @@ def easySphere(mass, numDense, ngas, filename, mu=1.4):
         "mass": mass,
         "temp": 15,
         "mu": 1.4,
+        "beta": beta,
         "boxDims": [5, 5, 5],
         "tempFactor": 2,
     }
