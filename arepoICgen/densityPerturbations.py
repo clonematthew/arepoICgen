@@ -1,13 +1,15 @@
 # Importing libraries
 import numpy as np
 
+# Some useful constants
+G = 6.67e-8
+
 # Function to apply a BB density fluctuation
 def bossBodenheimer(ngas, pos, mass):
     # Calculate the centre of mass
     totMass = np.sum(mass)
     xCom = np.sum(pos[0] * mass) / totMass
     yCom = np.sum(pos[1] * mass) / totMass
-
 
     # Apply the density perturbation
     for i in range(ngas):

@@ -56,6 +56,12 @@ def generateICs(config, params):
         # Creating a random spherical grid
         pos, volume = sphereRandom(ngas, params["radii"])
 
+    elif config["grid"] == "ellipseRan":
+        from .shapeTypes import ellipsoidalCloud
+
+        # Creating ellipsoid cloud
+        pos = ellipsoidalCloud(params["ellipseX"], params["ellipseY"], params["ellipseZ"], ngas)
+
     # Adjusting positions to be in cm
     pos = pos * 3.09e18
 
@@ -127,10 +133,10 @@ def generateICs(config, params):
     # Special Functions #
     #####################
 
-    # Add a Boss-Bodenheimer density perturbation
+    # Add a Boss-Bodenheimer density perturbation (Boss & Bodenheimer 1979)
     if config["extras"] == "bossBodenheimer":
         print("Adding Boss-Bodenheimer perturbation")
-        from .bossBodenheimer import bossBodenheimer
+        from .densityPerturbations import bossBodenheimer
         pos, pMass = bossBodenheimer(ngas, pos, pMass)
 
     ###################################
@@ -228,3 +234,39 @@ def generateICs(config, params):
             hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, config["bField"], True, pDensity)
     else:
         print("Fortran binary version is broken, sorry </3")
+
+# Function to just easily create a uniform sphere       
+def easySphere(mass, numDense, ngas, filename, mu=1.4):
+    # Convert number density to density
+    density = numDense * 1.66e-24 * mu
+
+    # Calculate the radius of the sphere
+    volume = (mass*1.991e33) / density
+    radius = (volume * 3/(4*np.pi))**(1/3)
+    radius = radius / 3.09e18
+
+    # Generate the initial conditions
+    config = {
+        "grid": "sphereGrid",
+        "turbulence": "static",
+        "rotation": "static",
+        "padding": True,
+        "output": "hdf5",
+        "outValue": "masses",
+        "extras": "none",
+        "bField": False,
+        "filename": filename
+    }
+
+    params = {
+        "ngas": ngas,
+        "bounds": [0, radius*5, 0, radius*5, 0, radius*5],
+        "radii": radius,
+        "mass": mass,
+        "temp": 15,
+        "mu": 1.4,
+        "boxDims": [5, 5, 5],
+        "tempFactor": 2,
+    }
+
+    generateICs(config, params)

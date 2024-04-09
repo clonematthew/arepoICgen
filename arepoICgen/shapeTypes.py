@@ -91,3 +91,29 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
 
     return ngasNew, pos, volume
 
+# Function for an ellipsodial cloud
+def ellipsoidalCloud(xRadius, yRadius, zRadius, ngas):
+    # Generate array for positions
+    pos = np.zeros((3, ngas), dtype=np.float64)
+
+    # Calculate radii bounds
+    xx = xRadius**2
+    yy = yRadius**2
+    zz = zRadius**2
+
+    # Generate points on an ellipse
+    i = 0
+    while i < ngas:
+        # Generate the x, y and z coordinates of the points
+        x = -xRadius + 2 * xRadius * np.random.random()
+        y = -yRadius + 2 * yRadius * np.random.random()
+        z = -zRadius + 2 * zRadius * np.random.random()
+
+        # Check we've the right length
+        if (x*x/xx + y*y/yy + z*z/zz) <= 1: 
+            pos[0,i] = x
+            pos[1,i] = y
+            pos[2,i] = z
+            i += 1
+
+    return pos
