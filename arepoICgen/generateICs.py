@@ -104,7 +104,7 @@ def generateICs(config, params):
             vels = boxGridTurbulence(velx, vely, velz, pos, pMass, int(config["turbSize"]), params["virialParam"])
 
         # Branch for the spherical scenarios
-        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan":
+        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan" or config["grid"] == "ellipseRan":
             from .turbulence import sphericalGridTurbulence
 
             # Interpolating and assigning velocities
@@ -161,7 +161,7 @@ def generateICs(config, params):
             pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padBox(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["tempFactor"])
         
         # Branch for the spherical setups
-        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan":
+        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan" or config["grid"] == "ellipseRan":
             from .lowDensityPadding import padSphere
 
             # Pad the box with low density particles outside the spherical cloud
