@@ -161,11 +161,19 @@ def generateICs(config, params):
             pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padBox(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["tempFactor"])
         
         # Branch for the spherical setups
-        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan" or config["grid"] == "ellipseRan":
+        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan":
             from .lowDensityPadding import padSphere
 
             # Pad the box with low density particles outside the spherical cloud
             pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["tempFactor"])
+
+        # Branch for the ellipse setups
+        elif config["grid"] == "ellipseRan":
+            from .lowDensityPadding import padEllipse
+
+            # Pad the box with low density particles outside the ellipse
+            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padEllipse(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["ellipseX"], params["ellipseY"], params["ellipseZ"], params["tempFactor"])
+
         else:
             ngasAll = ngas
     else:

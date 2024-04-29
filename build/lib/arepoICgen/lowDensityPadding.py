@@ -173,3 +173,82 @@ def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
             pass
 
     return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)
+
+def padEllipse(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, eX, eY, eZ, tempFactor):
+    # Convert the ellipse dimensions
+    eX = 3.09e18 * eX
+    eY = 3.09e18 * eY
+    eZ = 3.09e18 * eZ
+
+    # Use 2% of the number of particles to pad the box 
+    nPaddingParticles = int(0.02 * ngas)
+
+    # Create new arrays that are long enough for all the particles
+    newPos = np.zeros((3, nPaddingParticles), dtype=np.float64)
+    newVels = np.zeros((3, nPaddingParticles), dtype=np.float64)
+    newMass = np.zeros(nPaddingParticles, dtype=np.float64)
+    newIDs = np.zeros(nPaddingParticles, dtype=np.int32)
+    newEnergy = np.zeros(nPaddingParticles, dtype=np.float64)
+    newRho = np.zeros(nPaddingParticles, dtype=np.float64)
+
+    # Append these new arrays to the end of our old ones
+    pos = np.append(pos, newPos, axis=1)
+    vels = np.append(vels, newVels, axis=1)
+    pMass = np.append(pMass, newMass)
+    pIDs = np.append(pIDs, newIDs)
+    pEnergy = np.append(pEnergy, newEnergy)
+    pRho = np.append(np.ones(ngas), newRho)
+
+    # Working out the centre of the cloud and the box size
+    mtot = np.sum(pMass)
+    xcom = np.sum(pos[0] * pMass) / mtot
+    ycom = np.sum(pos[1] * pMass) / mtot
+    zcom = np.sum(pos[2] * pMass) / mtot
+
+    # Getting dimensions from this
+    maxDimension = np.max(pos)
+    minDimensionX = np.min(pos) * boxDims[0]
+    minDimensionY = np.min(pos) * boxDims[1]
+    minDimensionZ = np.min(pos) * boxDims[2]
+    maxDimensionX = boxDims[0] * maxDimension
+    maxDimensionY = boxDims[1] * maxDimension
+    maxDimensionZ = boxDims[2] * maxDimension
+    boxVolume = (maxDimensionX - minDimensionX) * (maxDimensionY - minDimensionY) * (maxDimensionZ - minDimensionZ)
+
+    # Getting the volume of the cloud
+    cloudVolume = (np.pi * 4/3) * (eX * eY * eZ)
+    cloudMass = np.sum(pMass)
+    cloudDensity = cloudMass / cloudVolume
+
+    # Setting the density of the particles within the cloud to this
+    pRho = pRho * cloudDensity
+
+    # Calculating mass of the particles we'll pad with
+    newParticleMass = (0.01 * cloudDensity) * (boxVolume - cloudVolume) / nPaddingParticles
+
+    # Randomly spraying the particles around the box
+    placedPoints = 0 
+
+    while placedPoints < nPaddingParticles:
+        # Trying an x, y and z point
+        xTry = minDimensionX + (maxDimensionX - minDimensionX) * random()
+        yTry = minDimensionY + (maxDimensionY - minDimensionY) * random()
+        zTry = minDimensionZ + (maxDimensionZ - minDimensionZ) * random()
+
+        # Adding if its outside the cloud
+        if abs(xTry) < eX and abs(yTry) < eY and abs(zTry) < eZ:
+            pass
+        else:
+            placedPoints += 1
+            pID = ngas + placedPoints -1
+
+            # Placing the particles inside the arrays
+            pos[0,pID] = xTry
+            pos[1,pID] = yTry
+            pos[2,pID] = zTry
+            pIDs[pID] = pID + 1
+            pEnergy[pID] = pEnergy[0] * tempFactor
+            pMass[pID] = newParticleMass
+            pRho[pID] = 0.01 * cloudDensity
+
+    return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)   
