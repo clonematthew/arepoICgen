@@ -252,3 +252,71 @@ def padEllipse(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, eX, eY, eZ, tempF
             pRho[pID] = 0.01 * cloudDensity
 
     return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)   
+
+def padCylinder(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, length, radius, tempFactor):
+    # Use 2% of the number of particles to pad the box 
+    nPaddingParticles = int(0.02 * ngas)
+
+    # Create new arrays that are long enough for all the particles
+    newPos = np.zeros((3, nPaddingParticles), dtype=np.float64)
+    newVels = np.zeros((3, nPaddingParticles), dtype=np.float64)
+    newMass = np.zeros(nPaddingParticles, dtype=np.float64)
+    newIDs = np.zeros(nPaddingParticles, dtype=np.int32)
+    newEnergy = np.zeros(nPaddingParticles, dtype=np.float64)
+    newRho = np.zeros(nPaddingParticles, dtype=np.float64)
+
+    # Append these new arrays to the end of our old ones
+    pos = np.append(pos, newPos, axis=1)
+    vels = np.append(vels, newVels, axis=1)
+    pMass = np.append(pMass, newMass)
+    pIDs = np.append(pIDs, newIDs)
+    pEnergy = np.append(pEnergy, newEnergy)
+    pRho = np.append(np.ones(ngas), newRho)
+
+    # Find the length of the cloud in each dimension
+    xWidth = np.max(pos[0]) - np.min(pos[0])
+    yWidth = np.max(pos[1]) - np.min(pos[1])
+    zWidth = np.max(pos[2]) - np.min(pos[2])
+
+    # Working out the final size of the cloud
+    minDimension = np.min(pos)
+    maxDimension = np.max(pos)
+
+    minDimension *= boxDims
+    maxDimension *= boxDims
+
+    boxVolume = (maxDimension - minDimension)**3
+
+    # Working out the density 
+    cloudVolume = (np.pi * 4/3) * (xWidth * yWidth * zWidth)
+    cloudDensity = cloudVolume / np.sum(pMass)
+
+    # Assigning the density of the padding particles
+    newParticleMass = (0.01 * cloudDensity) * (boxVolume - cloudVolume) / nPaddingParticles
+
+    # Finding particles to pad the cloud with
+    placedPoints = 0 
+
+    while placedPoints < nPaddingParticles:
+        # Trying an x, y and z point
+        xTry = minDimension + (maxDimension - minDimension) * random()
+        yTry = minDimension + (maxDimension - minDimension) * random()
+        zTry = minDimension + (maxDimension - minDimension) * random()
+
+        # Adding if its outside the cloud
+        if abs(xTry) <= 0.5 * length * 3.09e18 and np.sqrt(yTry**2 + zTry**2) <= radius * 3.09e18:
+            pass
+        else:
+            placedPoints += 1
+            pID = ngas + placedPoints -1
+
+            # Placing the particles inside the arrays
+            pos[0,pID] = xTry
+            pos[1,pID] = yTry
+            pos[2,pID] = zTry
+            pIDs[pID] = pID + 1
+            pEnergy[pID] = pEnergy[0] * tempFactor
+            pMass[pID] = newParticleMass
+            pRho[pID] = 0.01 * cloudDensity
+
+    return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)  

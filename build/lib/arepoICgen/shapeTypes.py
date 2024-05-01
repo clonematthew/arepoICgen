@@ -117,3 +117,24 @@ def ellipsoidalCloud(xRadius, yRadius, zRadius, ngas):
             i += 1
 
     return pos
+
+def cylindricalCloud(ngas, radius, length):
+    # Setup the positions arrays
+    pos = np.zeros((3, ngas), dtype=np.float64)
+
+    # Generate points of the cylnder
+    i = 0
+    while i < ngas:
+        # Generate x (cylinder axis), y and z points of the cylinder
+        x = -0.5 * length + length * np.random.random()
+        y = - radius + 2 * radius * np.random.random()
+        z = - radius + 2 * radius * np.random.random()
+
+        # Check inside the cylinder
+        if np.sqrt(y*y + z*z) <= radius:
+            pos[0,i] = x
+            pos[1,i] = y
+            pos[2,i] = z
+            i += 1
+    
+    return pos

@@ -62,6 +62,12 @@ def generateICs(config, params):
         # Creating ellipsoid cloud
         pos = ellipsoidalCloud(params["ellipseX"], params["ellipseY"], params["ellipseZ"], ngas)
 
+    elif config["grid"] == "cylinderRan":
+        from .shapeTypes import cylindricalCloud
+
+        # Creating cylinderical cloud
+        pos = cylindricalCloud(ngas, params["radii"], params["length"])
+
     # Adjusting positions to be in cm
     pos = pos * 3.09e18
 
@@ -104,7 +110,7 @@ def generateICs(config, params):
             vels = boxGridTurbulence(velx, vely, velz, pos, pMass, int(config["turbSize"]), params["virialParam"])
 
         # Branch for the spherical scenarios
-        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan" or config["grid"] == "ellipseRan":
+        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan" or config["grid"] == "ellipseRan" or config["grid"] == "cylinderRan":
             from .turbulence import sphericalGridTurbulence
 
             # Interpolating and assigning velocities
@@ -138,6 +144,9 @@ def generateICs(config, params):
         print("Adding Boss-Bodenheimer perturbation")
         from .densityPerturbations import bossBodenheimer
         pos, pMass = bossBodenheimer(ngas, pos, pMass)
+    elif config["extras"] == "densityGradient":
+        from .densityPerturbations import densityGradient
+        pMass = densityGradient(pos, pMass)
 
     ###################################
     # Setting particle identification #
@@ -162,7 +171,7 @@ def generateICs(config, params):
         
         # Branch for the spherical setups
         elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan":
-            from .lowDensityPadding import padSphere
+            from .lowDensityPadding import padSphere#
 
             # Pad the box with low density particles outside the spherical cloud
             pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["tempFactor"])
@@ -173,9 +182,12 @@ def generateICs(config, params):
 
             # Pad the box with low density particles outside the ellipse
             pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padEllipse(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["ellipseX"], params["ellipseY"], params["ellipseZ"], params["tempFactor"])
+        
+        # Branch for the cylinder setup
+        elif config["grid"] == "cylinderRan":
+            from .lowDensityPadding import padCylinder
 
-        else:
-            ngasAll = ngas
+            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padCylinder(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["length"], params["radii"], params["tempFactor"])
     else:
         ngasAll = ngas
         pass

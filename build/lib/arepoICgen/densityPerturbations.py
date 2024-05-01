@@ -26,3 +26,7 @@ def bossBodenheimer(ngas, pos, mass):
     print("Boss-Bodenheimer Density Perturbation Applied")
 
     return pos, mass
+
+def densityGradient(pos, mass, lowerDensity=0.66, upperDensity=1.33):
+    distance = pos[0] + np.max(pos[0])
+    return lowerDensity * mass + (upperDensity-lowerDensity) * mass * (distance/np.max(distance))
