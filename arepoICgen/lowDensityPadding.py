@@ -224,7 +224,7 @@ def padEllipse(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, eX, eY, eZ, tempF
     pRho = pRho * cloudDensity
 
     # Calculating mass of the particles we'll pad with
-    newParticleMass = (0.01 * cloudDensity) * (boxVolume - cloudVolume) / nPaddingParticles
+    newParticleMass = (0.01 * cloudDensity) * (cloudVolume) / nPaddingParticles
 
     # Randomly spraying the particles around the box
     placedPoints = 0 
@@ -292,7 +292,7 @@ def padCylinder(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, length, radius, 
     cloudDensity = cloudVolume / np.sum(pMass)
 
     # Assigning the density of the padding particles
-    newParticleMass = (0.01 * cloudDensity) * (boxVolume - cloudVolume) / nPaddingParticles
+    newParticleMass = (0.01 * cloudDensity) * (cloudVolume) / nPaddingParticles
 
     # Finding particles to pad the cloud with
     placedPoints = 0 
