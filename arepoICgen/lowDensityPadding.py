@@ -130,6 +130,8 @@ def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
     zmin = boxDims[2] * np.min(pos[2])
     zmax = boxDims[2] * np.max(pos[2])
 
+    boxVolume = (xmax - xmin) * (ymax - ymin) * (zmax - zmin)
+
     # Find radius of the cloud
     cloudRadius = np.max(np.sqrt((pos[0] - xcom)**2 + (pos[1] - ycom)**2 + (pos[2] - zcom)**2))
     cloudVolume = np.pi * cloudRadius**3 * 4./3.
@@ -141,7 +143,7 @@ def padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, tempFactor):
     pRho = pRho * cloudDensity
 
     # Calculating mass of the particles we'll pad with
-    newParticleMass = (0.01 * cloudDensity) * cloudVolume / nPaddingParticles
+    newParticleMass = (0.01 * cloudDensity) * (boxVolume - cloudVolume) / nPaddingParticles
 
     # Randomly spraying particles around the sphere
     placedPoints = 0
@@ -199,12 +201,6 @@ def padEllipse(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, eX, eY, eZ, tempF
     pEnergy = np.append(pEnergy, newEnergy)
     pRho = np.append(np.ones(ngas), newRho)
 
-    # Working out the centre of the cloud and the box size
-    mtot = np.sum(pMass)
-    xcom = np.sum(pos[0] * pMass) / mtot
-    ycom = np.sum(pos[1] * pMass) / mtot
-    zcom = np.sum(pos[2] * pMass) / mtot
-
     # Getting dimensions from this
     maxDimension = np.max(pos)
     minDimensionX = np.min(pos) * boxDims[0]
@@ -224,7 +220,7 @@ def padEllipse(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, eX, eY, eZ, tempF
     pRho = pRho * cloudDensity
 
     # Calculating mass of the particles we'll pad with
-    newParticleMass = (0.01 * cloudDensity) * (cloudVolume) / nPaddingParticles
+    newParticleMass = (0.01 * cloudDensity) * (boxVolume - cloudVolume) / nPaddingParticles
 
     # Randomly spraying the particles around the box
     placedPoints = 0 
@@ -292,7 +288,7 @@ def padCylinder(ngas, pos, vels, pMass, pIDs, pEnergy, boxDims, length, radius, 
     cloudDensity = cloudVolume / np.sum(pMass)
 
     # Assigning the density of the padding particles
-    newParticleMass = (0.01 * cloudDensity) * (cloudVolume) / nPaddingParticles
+    newParticleMass = (0.01 * cloudDensity) * (boxVolume - cloudVolume) / nPaddingParticles
 
     # Finding particles to pad the cloud with
     placedPoints = 0 
