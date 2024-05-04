@@ -92,22 +92,22 @@ def sphericalCloud(pos, cloudSize, ngas, bounds):
     return ngasNew, pos, volume
 
 # Function for an ellipsodial cloud
-def ellipsoidalCloud(xRadius, yRadius, zRadius, ngas):
+def ellipsoidalCloud(ellipseLengths, ngas):
     # Generate array for positions
     pos = np.zeros((3, ngas), dtype=np.float64)
 
     # Calculate radii bounds
-    xx = xRadius**2
-    yy = yRadius**2
-    zz = zRadius**2
+    xx = ellipseLengths[0]**2
+    yy = ellipseLengths[1]**2
+    zz = ellipseLengths[2]**2
 
     # Generate points on an ellipse
     i = 0
     while i < ngas:
         # Generate the x, y and z coordinates of the points
-        x = -xRadius + 2 * xRadius * np.random.random()
-        y = -yRadius + 2 * yRadius * np.random.random()
-        z = -zRadius + 2 * zRadius * np.random.random()
+        x = -ellipseLengths[0] + 2 * ellipseLengths[0] * np.random.random()
+        y = -ellipseLengths[1] + 2 * ellipseLengths[1] * np.random.random()
+        z = -ellipseLengths[2] + 2 * ellipseLengths[2] * np.random.random()
 
         # Check we've the right length
         if (x*x/xx + y*y/yy + z*z/zz) <= 1: 
@@ -116,7 +116,10 @@ def ellipsoidalCloud(xRadius, yRadius, zRadius, ngas):
             pos[2,i] = z
             i += 1
 
-    return pos
+    # Work out volume
+    volume = (np.pi * 4/3) * (ellipseLengths[0] * ellipseLengths[1] * ellipseLengths[2])
+
+    return pos, volume
 
 def cylindricalCloud(ngas, radius, length):
     # Setup the positions arrays
@@ -136,5 +139,8 @@ def cylindricalCloud(ngas, radius, length):
             pos[1,i] = y
             pos[2,i] = z
             i += 1
+
+    # Work out volume
+    volume = np.pi * radius**2 * length
     
-    return pos
+    return pos, volume

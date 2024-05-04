@@ -6,14 +6,14 @@
 # Imports
 import numpy as np
 
+# Defining the code units
+uMass = 1.991e33    # grams
+uDist = 1e17        # cm
+uVelo = 36447.2682  # cm/s
+uEner = 1.328e9     # ergs
+
 # Generate the initial conditions 
 def generateICs(config, params):
-    # Defining the code units
-    uMass = 1.991e33    # grams
-    uDist = 1e17        # cm
-    uVelo = 36447.2682  # cm/s
-    uEner = 1.328e9     # ergs
-
     # Setting ngas
     ngas = int(params["ngas"])
 
@@ -60,13 +60,13 @@ def generateICs(config, params):
         from .shapeTypes import ellipsoidalCloud
 
         # Creating ellipsoid cloud
-        pos = ellipsoidalCloud(params["ellipseX"], params["ellipseY"], params["ellipseZ"], ngas)
+        pos, volume = ellipsoidalCloud(params["ellipseLengths"], ngas)
 
     elif config["grid"] == "cylinderRan":
         from .shapeTypes import cylindricalCloud
 
         # Creating cylinderical cloud
-        pos = cylindricalCloud(ngas, params["radii"], params["length"])
+        pos, volume = cylindricalCloud(ngas, params["radii"], params["length"])
 
     # Adjusting positions to be in cm
     pos = pos * 3.09e18
@@ -116,7 +116,7 @@ def generateICs(config, params):
             # Interpolating and assigning velocities
             vels = sphericalGridTurbulence(velx, vely, velz, pos, pMass, int(config["turbSize"]), params["virialParam"])
         else:
-            pass
+            vels = np.zeros((3, ngas), dtype=np.float64)
     else:
         # Assgining an empty velocity array if no tubulence setup
         vels = np.zeros((3, ngas), dtype=np.float64)
@@ -132,8 +132,6 @@ def generateICs(config, params):
 
         # Add rotation around z axis of given beta energy ratio
         vels = addRotation(pos, pMass, vels, params["beta"])
-    else:
-        pass
 
     #####################
     # Special Functions #
@@ -144,6 +142,8 @@ def generateICs(config, params):
         print("Adding Boss-Bodenheimer perturbation")
         from .densityPerturbations import bossBodenheimer
         pos, pMass = bossBodenheimer(ngas, pos, pMass)
+
+    # Add a density gradient across one axis (x in this case, 0.66rho -> 1.33rho)
     elif config["extras"] == "densityGradient":
         from .densityPerturbations import densityGradient
         pMass = densityGradient(pos, pMass)
@@ -159,42 +159,16 @@ def generateICs(config, params):
     # Low density particle padding #
     ################################
 
-    # Setup for padding the box with low density particles
+    # Pad the box with low density particles
     if config["padding"] == True:
-        # Branch for the box setups
-        print("Padding box with low density particles")
-        if config["grid"] == "boxGrid" or config["grid"] == "boxRan":
-            from .lowDensityPadding import padBox
-
-            # Pad the box with low density particles outside the box grid
-            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padBox(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["tempFactor"])
-        
-        # Branch for the spherical setups
-        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan":
-            from .lowDensityPadding import padSphere#
-
-            # Pad the box with low density particles outside the spherical cloud
-            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padSphere(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["tempFactor"])
-
-        # Branch for the ellipse setups
-        elif config["grid"] == "ellipseRan":
-            from .lowDensityPadding import padEllipse
-
-            # Pad the box with low density particles outside the ellipse
-            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padEllipse(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["ellipseX"], params["ellipseY"], params["ellipseZ"], params["tempFactor"])
-        
-        # Branch for the cylinder setup
-        elif config["grid"] == "cylinderRan":
-            from .lowDensityPadding import padCylinder
-
-            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padCylinder(ngas, pos, vels, pMass, pIDs, pEnergy, params["boxDims"], params["length"], params["radii"], params["tempFactor"])
+        from .lowDensityPadding import padGeneric
+        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxDims"], config["grid"], params["tempFactor"])
     else:
         ngasAll = ngas
-        pass
 
-    #############################
-    # Making positions positive #
-    #############################
+    ####################
+    # Moving the cloud #
+    ####################
 
     # Getting the minimum value of every coordinate
     minx = np.min(pos[0])
