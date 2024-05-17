@@ -67,8 +67,8 @@ def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType,
     # Setting the density of the particles within the cloud to this
     pRho = pRho * cloudDensity
 
-    # Calculating mass of the particles we'll pad with
-    newParticleMass = (0.01 * cloudDensity) * (boxVolume - cloudVolume) / nPaddingParticles   
+    # Calculating mass of the particles we'll pad with 
+    newParticleMass = (0.01 * cloudDensity) * (cloudVolume) / nPaddingParticles 
 
     # Randomly spraying the particles around the box
     placedPoints = 0 
