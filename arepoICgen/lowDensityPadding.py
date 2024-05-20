@@ -3,7 +3,7 @@ import numpy as np
 from random import random 
 
 # Generic function for the padding
-def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02):
+def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02, padDensity=0.01):
     # Use 2% of the number of particles to pad the box 
     nPaddingParticles = int(paddingPercent * ngas)
     print("Padding the box with %s new particles" % nPaddingParticles)
@@ -68,7 +68,7 @@ def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType,
     pRho = pRho * cloudDensity
 
     # Calculating mass of the particles we'll pad with 
-    newParticleMass = (0.01 * cloudDensity) * (cloudVolume) / nPaddingParticles 
+    newParticleMass = (padDensity * cloudDensity) * (cloudVolume) / nPaddingParticles 
 
     # Randomly spraying the particles around the box
     placedPoints = 0 

@@ -162,7 +162,8 @@ def generateICs(config, params):
     # Pad the box with low density particles
     if config["padding"] == True:
         from .lowDensityPadding import padGeneric
-        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxDims"], config["grid"], params["tempFactor"])
+
+        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxDims"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"])
     else:
         ngasAll = ngas
 
