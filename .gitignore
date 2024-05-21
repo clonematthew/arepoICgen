@@ -1,3 +1,5 @@
 *.hdf5
 *.ipynb
+*.pyc
+__pycache__
 turbulenceGrids/

@@ -6,7 +6,9 @@ from random import random
 def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02, padDensity=0.01, verbose=False):
     # Use 2% of the number of particles to pad the box 
     nPaddingParticles = int(paddingPercent * ngas)
-    print("Padding the box with %s new particles" % nPaddingParticles)
+
+    if verbose:
+        print("Padding the box with %s new particles" % nPaddingParticles)
 
     # Create new arrays that are long enough for all the particles
     newPos = np.zeros((3, nPaddingParticles), dtype=np.float64)

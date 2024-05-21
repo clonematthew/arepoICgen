@@ -12,7 +12,7 @@ params = {
     "mass": 100,
     "radii": 0.1,
     "temp": 15,
-    "mu", 2.4,
+    "mu": 2.4,
     "boxSize": [5,5,5],
     "tempFactor": 2,
     "paddingDensity": 0.01
@@ -38,7 +38,7 @@ params = {
     "lengths": [1, 0, 0],
     "radii": 0.1,
     "temp": 15,
-    "mu", 2.4,
+    "mu": 2.4,
     "virialParam": 0.5,
     "boxSize": [5,5,5],
     "tempFactor": 2,
@@ -63,7 +63,7 @@ params = {
     "lengths": [100, 100, 200],
     "beta": 0.01,
     "temp": 15,
-    "mu", 2.4,
+    "mu": 2.4,
     "boxSize": [5,5,5],
     "tempFactor": 2,
     "paddingDensity": 0.01

@@ -30,6 +30,8 @@ def generateICs(config, params):
         config["verbose"] = False
     if "turbulence" not in configKeys:
         config["turbulence"] = "static"
+    if "bField" not in configKeys:
+        config["bField"] = False
 
     #######################
     # Grid type selection #
@@ -228,9 +230,7 @@ def generateICs(config, params):
     ########################
     # File output to AREPO #
     ########################
-
-    print("Writing output file")
-
+        
     if config["output"] == "hdf5":
         from .arepoOut import hdf5out
 
