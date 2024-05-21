@@ -179,7 +179,7 @@ def generateICs(config, params):
     if config["padding"] == True:
         from .lowDensityPadding import padGeneric
 
-        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"], config["verbose"])
+        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"], verbose=config["verbose"])
     else:
         ngasAll = ngas
 
