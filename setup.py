@@ -5,11 +5,12 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="arepoICgen",
-    version="0.07",
     author="Matt Cusack",
     author_email="cusackmt@cardiff.ac.uk",
     description="Package for generating initial conditions for AREPO",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages()
+    url="https://github.com/clonematthew/arepoICgen",
+    package_dir={'':'src'},
+    packages=setuptools.find_packages(where='src')
 )
