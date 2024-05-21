@@ -1,0 +1,72 @@
+# A static, uniform density sphere immersed in a low-density box
+
+config = {
+    "grid": "sphereGrid",
+    "padding": True,
+    "output": "hdf5",
+    "filename": "uSphereStatic"
+}
+
+params = {
+    "ngas": 1e5,
+    "mass": 100,
+    "radii": 0.1,
+    "temp": 15,
+    "mu", 2.4,
+    "boxSize": [5,5,5],
+    "tempFactor": 2,
+    "paddingDensity": 0.01
+}
+
+generateICs(config, params)
+
+# A cylindrical cloud with strong internal turbulence
+
+config = {
+    "grid": "cylinderRan",
+    "turbulence": "turbFile",
+    "turbFile": "./vel3D.bin",
+    "turbSize": 128,
+    "padding": True,
+    "output": "hdf5",
+    "filename": "turbulentCylinder"
+}
+
+params = {
+    "ngas": 1e6,
+    "mass": 2e3,
+    "lengths": [1, 0, 0],
+    "radii": 0.1,
+    "temp": 15,
+    "mu", 2.4,
+    "virialParam": 0.5,
+    "boxSize": [5,5,5],
+    "tempFactor": 2,
+    "paddingDensity": 0.01
+}
+
+generateICs(config, params)
+
+# A rapidly rotating elliptical cloud
+
+config = {
+    "grid": "ellipseRan",
+    "rotation": "rotation",
+    "padding": True,
+    "output": "hdf5",
+    "filename": "ellipseSpin"    
+}
+
+params = {
+    "ngas": 1e7,
+    "mass": 2e5,
+    "lengths": [100, 100, 200],
+    "beta": 0.01,
+    "temp": 15,
+    "mu", 2.4,
+    "boxSize": [5,5,5],
+    "tempFactor": 2,
+    "paddingDensity": 0.01
+}
+
+generateICs(config, params)

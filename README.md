@@ -17,7 +17,7 @@ arepoICgen takes in two python dictionaries as inputs, **config** and **params**
 | ----------- | ----------- | ---- | --| 
 | verbose | True, False | Whether to print extended feedback as the code runs (does not affect the ICs) | |
 | grid* | boxGrid, boxRan, sphereGrid, sphereRan, ellipseRan, cylinderRan | The geometry and particle distribution (gridded or random). | lengths, radii |
-| turbulence* | turbFile, static | Whether to apply to turbulent velocity field or leave the cloud static | virialParam | 
+| turbulence | turbFile  | Whether to apply to turbulent velocity field from a file | virialParam | 
 | turbFile | _path_to_file_ | The path to a turbulent velocity grid file, needed only for _turbFile_ | | 
 | turbSize | _integer_ | The size of the velocity grid (assumed equal length cubic), needed only for _turbFile_ | |
 | rotation | rotation| Whether to add rotation to the cloud | beta |
@@ -40,7 +40,7 @@ Note that lengths and radii are both marked as required, but only one may be nee
 | mass* | $\rm [M_\odot]$ | The total mass of the cloud | |
 | temp* | $\rm [K]$ | The inital temperature of the gas inside the cloud | |
 | mu* | $\mu$ | The mean molecular weight of the gas in the cloud, typically 1.4 for atomic and 2.4 for molecular | |
-| virialParam | $\alpha = \rm\frac{E_{Kin}}{E_{Grav}}$ | The virial parameter of the cloud, used for scaling turbulent velocities | turbFile |
+| virialParam | $\alpha = \rm\frac{E_{Kin}}{E_{Grav}}$ | The virial parameter of the cloud, used for scaling turbulent velocities | turbulence |
 | beta | $\beta = \rm \frac{E_{Rot}}{E_{Grav}}$ | The ratio between rotational and gravitational energy | rotation |
 | boxSize| [x, y, z] | The factor by which the box should be larger than the cloud in each dimension (i.e 2x, 3x, 4x the size) | padding |
 | tempFactor | | How much hotter to make the padding particles compared to the cloud particles | padding |

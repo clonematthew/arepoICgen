@@ -28,6 +28,8 @@ def generateICs(config, params):
         config["outValue"] = "masses"
     if "verbose" not in configKeys:
         config["verbose"] = False
+    if "turbulence" not in configKeys:
+        config["turbulence"] = "static"
 
     #######################
     # Grid type selection #
