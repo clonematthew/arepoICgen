@@ -1,190 +1,69 @@
-# AREPO-icgen
-Program for creating initial conditions for the AREPO code
-
-The code works by calling generateICs(config, params), where config and params are dictionary objects that contain the settings to be used.
-The config options are needed for all runs, but some parameters are only needed for particular configurations. Parameters that are not needed for a particular setup can be omitted.
-
-#### Config Options
-
-######################
-# Initial grid setup #
-######################
-
-boxGrid    = Box of particles in an evenly spaced grid
-
-boxRan     = Box of randomly spaced particles
-
-sphereRan  = Sphere of randomly spaced particles
-
-sphereGrid = Spherical volume cut of an evenly spaced grid of particles
-
-"grid": *grid type*
-
-####################
-# Turbulence setup #
-####################
-
-turbFile = Turbulence from a 3D velocity cube file
-
-static   = No turbulent velocities
-
-"turbulence": *turbulence type*
-
-If using turbFile, need to include a turbulence file along with its grid size:
-
-"turbFile": *path/to/file*
-
-"turbSize": *Size of the grid (64, 128, etc)*
-
-##################
-# Rotation Setup #
-##################
-
-rotation = Add rotation to the body
-
-static   = No body rotation
-
-"rotation": *rotation type*
-
-#######################
-# Low Density Padding #
-#######################
-
-True  = Pad the box outisde the cloud with low density particles
-
-False = ... don't
-
-"padding": *True/False*
-
-###############
-# File Output #
-###############
-
-arepo = Output a type 2 arepo datafile (broken)
-
-hdf5  = Output a hdf5 (type 3) datafile
-
-"output": *file type*
-
-masses = Output masses
-
-density = Output denisty as masses
-
-"outVal": *output quantity*
-
-True = Output a zero magnetic field for all particles [TESTING]
-
-False = Don't use magnetic field
-
-"bField": *magnetic field*
-
-filename = Name you want the file to be called (no need for extension)
-
-"filename": *filename*
-
-#### Parameter Options
-
-#######################
-# Physical Dimensions #
-#######################
-
-Number of particles [no units]
-
-"ngas": *number of particles*
-
-Min x, max x, min y, max y, min z, max z [pc]
-
-"bounds": [*xmin, xmax, ymin, ymax, zmin, zmax*]
-
-Spherical cloud radius [pc] 
-
-Only needed for spherical setups.
-
-"radii": *cloud radius*
-
-Total mass of the cloud [Msun]
-
-"mass": *cloud mass*
-
-###################
-# Thermal Physics #
-###################
-
-Temperature of the cloud [K]
-
-"temp": *cloud temperature*                       
-
-Mean molecular weight of the cloud [no units]
-
-"mu": *mu*                               
-
-Virial parameter, ratio of KE to GPE [no units]
-
-Only needed for clouds with turbulence. 
-
-"virialParam": *ratio*     
-
-####################
-# Rotation Physics #
-####################
-
-Beta parameter, ratio of rotational KE to GPE [no units]
-
-Only needed for clouds with rotation.
-
-"beta": *beta value*
-
-####################
-# Box Padding Info #
-####################
-
-The x, y and z size of the box around the cloud, multiples of the cloud size [no units]
-
-Only needed when padding the box with low density particles. 
-
-"boxDims": [*x, y, z*]
-
-How much hotter these particles should be compared to the cloud [no units]
-
-"tempFactor": *amount*
-
-###################
-# Desired Density #
-###################
-
-The desired number density of the cloud [cm^-3]
-
-Has to be consistent with the mass we've given above 
-
-Only needed if outputting density as mass.
-
-"density": *rho*
-
-#### Example
-
-An example config and parameter setup might look like below, for a uniform sphere of gas with rotation only:
+[![PyPI package](https://img.shields.io/badge/pip%20install-arepoICgen-brightgreen)](https://pypi.org/project/arepoICgen/) 
+[![version number](https://img.shields.io/pypi/v/arepoICgen?color=green&label=version)](https://github.com/clonematthew/arepoICgen/releases)
+
+## arepoICgen
+
+Package for creating Initial Conditions for the AMR code AREPO[^1] for simulations of molecular clouds intended for scientific research. Many parts of this code are adapted from a FORTRAN code developed by Paul Clark called _setpartarepo_. 
+
+This code is available via a direct clone of this repository, or through pip: `pip install arepoICgen`
+
+#### Usage Guide
+
+arepoICgen takes in two python dictionaries as inputs, **config** and **params**. Config provides the code information about the geometry and metadata of the cloud, while params supplies the physical parameters of the cloud. Some config and param flags are required, and others are optional. Required flags will be marked with a "*".
+
+##### Config
+
+| Flag | Options | Description | Associated Params |
+| ----------- | ----------- | ---- | --| 
+| verbose | True, False | Whether to print extended feedback as the code runs (does not affect the ICs) | |
+| grid* | boxGrid, boxRan, sphereGrid, sphereRan, ellipseRan, cylinderRan | The geometry and particle distribution (gridded or random). | lengths, radii |
+| turbulence* | turbFile, static | Whether to apply to turbulent velocity field or leave the cloud static | virialParam | 
+| turbFile | _path_to_file_ | The path to a turbulent velocity grid file, needed only for _turbFile_ | | 
+| turbSize | _integer_ | The size of the velocity grid (assumed equal length cubic), needed only for _turbFile_ | |
+| rotation | rotation| Whether to add rotation to the cloud | beta |
+| extras | bossBodenheimer, densityGradient | What density perturbation to add to the cloud, either Boss Bodenheimer[^2] or a linear density gradient[^3] |
+| padding* | True, False | Whether to pad the cloud with low density particles | tempFactor, boxDims, paddingDensity |
+| bField | True, False | Whether we need to give the particles an inital magnetic field value (note this does not do anything besides gives particles an initial B field of 0) | |
+| outValue | masses, density | Option to output the mass field as density (note this needs AREPO to be compiled with the right config flag for this) | density |
+| output* | hdf5 | Filetype to write the ICs as (type 2 binary coming... one day) | |
+| filename* | "..." | Name of the IC file (note that the file extension is not needed) | | 
+
+##### Params
+
+Note that lengths and radii are both marked as required, but only one may be needed in some cases. 
+
+| Flag | Format/Units | Description | Associated Config |
+| ---- | ------ | ----------- | ----------------- |
+| ngas* |  | Number of particles to populate the cloud with | |
+| lengths* | [xLength, yLength, zLength] $\rm [pc]$ | The length of the box or ellipse in each direction (for the cylinder, xLength is taken as the length of the cylinder) | grid |
+| radii* | Radius $\rm [pc]$ | The radius of a spherical cloud, or the radius of the face of a cylinder (not needed by box or elliptical setups) | grid | 
+| mass* | $\rm [M_\odot]$ | The total mass of the cloud | |
+| temp* | $\rm [K]$ | The inital temperature of the gas inside the cloud | |
+| mu* | $\mu$ | The mean molecular weight of the gas in the cloud, typically 1.4 for atomic and 2.4 for molecular | |
+| virialParam | $\alpha = \rm\frac{E_{Kin}}{E_{Grav}}$ | The virial parameter of the cloud, used for scaling turbulent velocities | turbFile |
+| beta | $\beta = \rm \frac{E_{Rot}}{E_{Grav}}$ | The ratio between rotational and gravitational energy | rotation |
+| boxSize| [x, y, z] | The factor by which the box should be larger than the cloud in each dimension (i.e 2x, 3x, 4x the size) | padding |
+| tempFactor | | How much hotter to make the padding particles compared to the cloud particles | padding |
+| paddingDensity |  % | What percent of the cloud's density should the padding region be | padding | 
+| density | $\rm cm^{-3}$ | Density to give particles when outputting mass as density | outValue |
+
+#### Calling generateICs
+
+arepoICgen is called using code similar to the following, where it is wrapped in the `generateICs` function:
 
 ```
-config = {
-    "grid": "sphereGrid",
-    "turbulence": "static",
-    "rotation": "rotation",
-    "padding": True,
-    "output": "hdf5",
-    "outValue": "masses",
-    "bField": False,
-    "filename": "uniformSphere"
-}
+from arepoICgen import generateICs
 
-params = {
-    "ngas": 200000,
-    "bounds": [0, 0.4, 0, 0.4, 0, 0.4],
-    "radii": 0.08,
-    "mass": 5,
-    "temp": 15,
-    "mu": 1.4,
-    "beta": 3,
-    "boxDims": [5, 5, 5],
-    "tempFactor": 2
-}
+config = {}
+params = {}
+
+generateICs(config, params)
 ```
+
+##### Examples
+
+See examples.txt for some example setups of the config and params dictionaries. 
+
+[^1]: AREPO is publicly available, see [here](https://arepo-code.org)
+[^2]: See Boss & Bodenheimer (1979)
+[^3]: See Bonnell et al. (2008) 
