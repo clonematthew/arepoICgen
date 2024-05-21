@@ -22,8 +22,6 @@ def bossBodenheimer(ngas, pos, mass):
 
         # Work out what the mass should be here
         mass[i] = mass[i] * (1 + 0.5 * np.cos(2*phi))
-        
-    print("Boss-Bodenheimer Density Perturbation Applied")
 
     return pos, mass
 

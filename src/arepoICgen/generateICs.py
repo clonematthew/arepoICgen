@@ -17,6 +17,18 @@ def generateICs(config, params):
     # Setting ngas
     ngas = int(params["ngas"])
 
+    # Checking the config keys and assigning defaults
+    configKeys = config.keys()
+    
+    if "rotation" not in configKeys:
+        config["rotation"] = "none"
+    if "extras" not in configKeys:
+        config["extras"] = "none"
+    if "outValue" not in configKeys:
+        config["outValue"] = "masses"
+    if "verbose" not in configKeys:
+        config["verbose"] = False
+
     #######################
     # Grid type selection #
     #######################
@@ -26,7 +38,7 @@ def generateICs(config, params):
         from .boxCreation import boxGrid
 
         # Creating a box grid
-        pos, ngas, bounds, volume = boxGrid(ngas, params["bounds"])
+        pos, ngas, volume = boxGrid(ngas, params["lengths"], config["verbose"])
 
         # Running the spherical cut module if sphere selected
     elif config["grid"] == "sphereGrid":
@@ -37,36 +49,39 @@ def generateICs(config, params):
         # Increase ngas as we will lose some particles when cutting out the sphere
         ngas = int(ngas * 6 / np.pi)
 
-        # Creating a box grid
-        pos, ngas, bounds, volume = boxGrid(ngas, params["bounds"])
+        # Our box will always be 2x the radius in each dimension
+        params["lengths"] = [2*params["radii"], 2*params["radii"], 2*params["radii"]]
 
-        # Creating spherical grid
-        ngas, pos, volume = sphericalCloud(pos, params["radii"], ngas, bounds)
+        # Creating a box grid
+        pos, ngas, volume = boxGrid(ngas, params["lengths"], config["verbose"])
+
+        # Cutting a sphere out of it 
+        ngas, pos, volume = sphericalCloud(pos, params["radii"], ngas, config["verbose"])
 
     # Randomly placed particle setups
     elif config["grid"] == "boxRan":
         from .boxCreation import boxRandom
 
         # Creating random box grid
-        pos, volume = boxRandom(ngas, params["bounds"])
+        pos, volume = boxRandom(ngas, params["lengths"], config["verbose"])
 
     elif config["grid"] == "sphereRan":
         from .boxCreation import sphereRandom
 
         # Creating a random spherical grid
-        pos, volume = sphereRandom(ngas, params["radii"])
+        pos, volume = sphereRandom(ngas, params["radii"], config["verbose"])
 
     elif config["grid"] == "ellipseRan":
         from .shapeTypes import ellipsoidalCloud
 
         # Creating ellipsoid cloud
-        pos, volume = ellipsoidalCloud(params["ellipseLengths"], ngas)
+        pos, volume = ellipsoidalCloud(params["lengths"], ngas, config["verbose"])
 
     elif config["grid"] == "cylinderRan":
         from .shapeTypes import cylindricalCloud
 
         # Creating cylinderical cloud
-        pos, volume = cylindricalCloud(ngas, params["radii"], params["length"])
+        pos, volume = cylindricalCloud(ngas, params["radii"], params["lengths"], config["verbose"])
 
     # Adjusting positions to be in cm
     pos = pos * 3.09e18
@@ -79,20 +94,20 @@ def generateICs(config, params):
     from .massAndEnergy import thermalEnergy
 
     # Setting equal particle masses
-    pMass = masses(ngas, params["mass"])
+    pMass = masses(ngas, params["mass"], config["verbose"])
 
     # Converting mass into grams
     pMass = pMass * 1.991e33 
 
     # Working out internal energy of each particle along with the sound speed
-    pEnergy, cs = thermalEnergy(ngas, params["temp"], params["mu"])
+    pEnergy = thermalEnergy(ngas, params["temp"], params["mu"], config["verbose"])
 
     # Converting energy into ergs 
     pEnergy = pEnergy * 1e7
 
-    ################################
-    # Velocities: Turbulence setup #
-    ################################
+    ##########################
+    # Velocities: Turbulence #
+    ##########################
 
     # Setup for turbulence from a velocity cube file
     if config["turbulence"] == "turbFile":
@@ -127,11 +142,10 @@ def generateICs(config, params):
 
     # Add rotation to the body
     if config["rotation"] == "rotation":
-        print("Adding solid body rotation")
         from .rotation import addRotation
 
         # Add rotation around z axis of given beta energy ratio
-        vels = addRotation(pos, pMass, vels, params["beta"])
+        vels = addRotation(pos, pMass, vels, params["beta"], config["verbose"])
 
     #####################
     # Special Functions #
@@ -163,7 +177,7 @@ def generateICs(config, params):
     if config["padding"] == True:
         from .lowDensityPadding import padGeneric
 
-        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxDims"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"])
+        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"], config["verbose"])
     else:
         ngasAll = ngas
 

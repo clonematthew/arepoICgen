@@ -3,7 +3,7 @@ import numpy as np
 from random import random 
 
 # Generic function for the padding
-def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02, padDensity=0.01):
+def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02, padDensity=0.01, verbose=False):
     # Use 2% of the number of particles to pad the box 
     nPaddingParticles = int(paddingPercent * ngas)
     print("Padding the box with %s new particles" % nPaddingParticles)
@@ -59,10 +59,11 @@ def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType,
     cloudRadius = np.max([(xmax-xmin)/2, (ymax-ymin)/2, (zmax-zmin)/2])
 
     pc = 3.09e18
-    print("Cloud Density of {:.2e}".format(cloudDensity))
-    print("Cloud Centre at {:.2f},{:.2f},{:.2f}".format(xcom/pc, ycom/pc, zcom/pc))
-    print("Cloud has Dimensions: {:.2f}-{:.2f},{:.2f}-{:.2f},{:.2f}-{:.2f}".format(cloudDimensions[0]/pc, cloudDimensions[1]/pc, cloudDimensions[2]/pc, cloudDimensions[3]/pc, cloudDimensions[4]/pc, cloudDimensions[5]/pc))
-    print("Box has Dimensions: {:.2f}-{:.2f},{:.2f}-{:.2f},{:.2f}-{:.2f}".format(minDimensionX/pc, maxDimensionX/pc, minDimensionY/pc, maxDimensionY/pc, minDimensionZ/pc, maxDimensionZ/pc))
+    if verbose:
+        print("Cloud Density of {:.2e}".format(cloudDensity))
+        print("Cloud Centre at {:.2f},{:.2f},{:.2f}".format(xcom/pc, ycom/pc, zcom/pc))
+        print("Cloud has Dimensions: {:.2f}-{:.2f},{:.2f}-{:.2f},{:.2f}-{:.2f}".format(cloudDimensions[0]/pc, cloudDimensions[1]/pc, cloudDimensions[2]/pc, cloudDimensions[3]/pc, cloudDimensions[4]/pc, cloudDimensions[5]/pc))
+        print("Box has Dimensions: {:.2f}-{:.2f},{:.2f}-{:.2f},{:.2f}-{:.2f}".format(minDimensionX/pc, maxDimensionX/pc, minDimensionY/pc, maxDimensionY/pc, minDimensionZ/pc, maxDimensionZ/pc))
 
     # Setting the density of the particles within the cloud to this
     pRho = pRho * cloudDensity
