@@ -44,7 +44,7 @@ Note that lengths and radii are both marked as required, but only one may be nee
 | beta | $\beta = \rm \frac{E_{Rot}}{E_{Grav}}$ | The ratio between rotational and gravitational energy | rotation |
 | boxSize| [x, y, z] | The factor by which the box should be larger than the cloud in each dimension (i.e 2x, 3x, 4x the size) | padding |
 | tempFactor | | How much hotter to make the padding particles compared to the cloud particles | padding |
-| paddingDensity |  % | What percent of the cloud's density should the padding region be | padding | 
+| paddingDensity |   | What fraction of the cloud's density should the padding region be | padding | 
 | density | $\rm cm^{-3}$ | Density to give particles when outputting mass as density | outValue |
 
 #### Calling generateICs
