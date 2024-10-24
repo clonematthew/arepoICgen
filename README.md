@@ -21,7 +21,7 @@ arepoICgen takes in two python dictionaries as inputs, **config** and **params**
 | turbFile | _path_to_file_ | The path to a turbulent velocity grid file, needed only for _turbFile_ | | 
 | turbSize | _integer_ | The size of the velocity grid (assumed equal length cubic), needed only for _turbFile_ | |
 | rotation | rotation| Whether to add rotation to the cloud | beta |
-| extras | bossBodenheimer, densityGradient | What density perturbation to add to the cloud, either Boss Bodenheimer[^2] or a linear density gradient[^3] |
+| extras | bossBodenheimer, densityGradient, bonnorEbert | What density perturbation to add to the cloud, either Boss Bodenheimer[^2], a linear density gradient[^3] or a Bonnor-Ebert[^4] density profile |
 | padding* | True, False | Whether to pad the cloud with low density particles | tempFactor, boxDims, paddingDensity |
 | bField | True, False | Whether we need to give the particles an inital magnetic field value (note this does not do anything besides gives particles an initial B field of 0) | |
 | outValue | masses, density | Option to output the mass field as density (note this needs AREPO to be compiled with the right config flag for this) | density |
@@ -67,3 +67,4 @@ See examples.txt for some example setups of the config and params dictionaries.
 [^1]: AREPO is publicly available, see [here](https://arepo-code.org)
 [^2]: See Boss & Bodenheimer (1979)
 [^3]: See Bonnell et al. (2008) 
+[^4]: See Bonnor (1956) and Ebert (1955)
