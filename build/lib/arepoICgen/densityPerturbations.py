@@ -50,14 +50,14 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     zC = np.sum(pos[2] * mass) / totMass
     
     # Find each particle's distance to the COM
-    rCentre = np.sqrt((pos[0] - xC)**2 + (pos[1] - yC)**2 + (pos[2] - zC)**2)
+    rCentre = np.sqrt((pos[0])**2 + (pos[1])**2 + (pos[2])**2)
     
     # Scale everything to the correct radius
     pos[0] = rBonnorEbert * pos[0] / np.max(rCentre) 
     pos[1] = rBonnorEbert * pos[1] / np.max(rCentre)
     pos[2] = rBonnorEbert * pos[2] / np.max(rCentre)
     rCentre = rBonnorEbert * rCentre / np.max(rCentre) 
-    
+
     # Apply the density profile
     density = centralDensity * rCharacteristic**2 / (rCharacteristic**2 + rCentre**2)
     
