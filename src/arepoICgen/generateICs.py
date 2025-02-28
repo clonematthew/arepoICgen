@@ -108,6 +108,26 @@ def generateICs(config, params):
 
     # Converting energy into ergs 
     pEnergy = pEnergy * 1e7
+    
+    #####################
+    # Special Functions #
+    #####################
+
+    # Add a Boss-Bodenheimer density perturbation (Boss & Bodenheimer 1979)
+    if config["extras"] == "bossBodenheimer":
+        print("Adding Boss-Bodenheimer perturbation")
+        from .densityPerturbations import bossBodenheimer
+        pos, pMass = bossBodenheimer(ngas, pos, pMass)
+
+    # Add a density gradient across one axis (x in this case, 0.66rho -> 1.33rho)
+    elif config["extras"] == "densityGradient":
+        from .densityPerturbations import densityGradient
+        pMass = densityGradient(pos, pMass)
+        
+    # Add a Bonnor-Ebert density profile
+    elif config["extras"] == "bonnorEbert":
+        from .densityPerturbations import bonnorEbert
+        pMass, pos = bonnorEbert(ngas, pos, pMass, params["temp"], params["mu"], params["mass"])
 
     ##########################
     # Velocities: Turbulence #
@@ -151,26 +171,6 @@ def generateICs(config, params):
         # Add rotation around z axis of given beta energy ratio
         vels = addRotation(pos, pMass, vels, params["beta"], params["rotationRadius"], config["verbose"])
 
-    #####################
-    # Special Functions #
-    #####################
-
-    # Add a Boss-Bodenheimer density perturbation (Boss & Bodenheimer 1979)
-    if config["extras"] == "bossBodenheimer":
-        print("Adding Boss-Bodenheimer perturbation")
-        from .densityPerturbations import bossBodenheimer
-        pos, pMass = bossBodenheimer(ngas, pos, pMass)
-
-    # Add a density gradient across one axis (x in this case, 0.66rho -> 1.33rho)
-    elif config["extras"] == "densityGradient":
-        from .densityPerturbations import densityGradient
-        pMass = densityGradient(pos, pMass)
-        
-    # Add a Bonnor-Ebert density profile
-    elif config["extras"] == "bonnorEbert":
-        from .densityPerturbations import bonnorEbert
-        pMass, pos = bonnorEbert(ngas, pos, pMass, params["temp"], params["mu"], params["mass"])
-
     ###################################
     # Setting particle identification #
     ###################################
@@ -187,9 +187,9 @@ def generateICs(config, params):
         from .lowDensityPadding import padGeneric
         
         if config["extras"] == "bonnorEbert":
-            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=np.min(pMass), verbose=config["verbose"], bonnorEbert=True)
+            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=np.min(pMass), verbose=config["verbose"], bonnorEbert=True)
         else:   
-            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos,vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"], verbose=config["verbose"])
+            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"], verbose=config["verbose"])
     else:
         ngasAll = ngas
 
