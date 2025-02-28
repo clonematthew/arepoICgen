@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: arepoICgen
-Version: 0.1.4
+Version: 0.1.5
 Summary: Package for generating initial conditions for AREPO
 Home-page: https://github.com/clonematthew/arepoICgen
 Author: Matt Cusack
@@ -29,8 +29,8 @@ arepoICgen takes in two python dictionaries as inputs, **config** and **params**
 | turbulence | turbFile  | Whether to apply to turbulent velocity field from a file | virialParam | 
 | turbFile | _path_to_file_ | The path to a turbulent velocity grid file, needed only for _turbFile_ | | 
 | turbSize | _integer_ | The size of the velocity grid (assumed equal length cubic), needed only for _turbFile_ | |
-| rotation | rotation| Whether to add rotation to the cloud | beta |
-| extras | bossBodenheimer, densityGradient, bonnorEbert | What density perturbation to add to the cloud, either Boss Bodenheimer[^2], a linear density gradient[^3] or a Bonnor-Ebert[^4] density profile |
+| rotation | rotation| Whether to add rotation to the cloud | beta, rotationRadius |
+| extras | bossBodenheimer, densityGradient, bonnorEbert | What density perturbation to add to the cloud, either Boss Bodenheimer[^2], a linear density gradient[^3] or a Bonnor-Ebert[^4] density profile (note this setting automatically outputs density as mass) |
 | padding* | True, False | Whether to pad the cloud with low density particles | tempFactor, boxDims, paddingDensity |
 | bField | True, False | Whether we need to give the particles an inital magnetic field value (note this does not do anything besides gives particles an initial B field of 0) | |
 | outValue | masses, density | Option to output the mass field as density (note this needs AREPO to be compiled with the right config flag for this) | density |
@@ -51,9 +51,10 @@ Note that lengths and radii are both marked as required, but only one may be nee
 | mu* | $\mu$ | The mean molecular weight of the gas in the cloud, typically 1.4 for atomic and 2.4 for molecular | |
 | virialParam | $\alpha = \rm\frac{E_{Kin}}{E_{Grav}}$ | The virial parameter of the cloud, used for scaling turbulent velocities | turbulence |
 | beta | $\beta = \rm \frac{E_{Rot}}{E_{Grav}}$ | The ratio between rotational and gravitational energy | rotation |
+| rotationRadius | AU | The radius outside of which to add rotation. Allows no angular momentum in the centre of the cloud so that numerical rings do not form | rotation |
 | boxSize| [x, y, z] | The factor by which the box should be larger than the cloud in each dimension (i.e 2x, 3x, 4x the size) | padding |
 | tempFactor | | How much hotter to make the padding particles compared to the cloud particles | padding |
-| paddingDensity |   | What fraction of the cloud's density should the padding region be | padding | 
+| paddingDensity |   | What fraction of the cloud's density should the padding region be (ignored for Bonnor-Ebert profile, padding density set to match outer BE sphere density) | padding | 
 | density | $\rm cm^{-3}$ | Density to give particles when outputting mass as density | outValue |
 
 #### Calling generateICs

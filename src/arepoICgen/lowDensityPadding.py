@@ -3,7 +3,7 @@ import numpy as np
 from random import random 
 
 # Generic function for the padding
-def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02, padDensity=0.01, verbose=False):
+def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02, padDensity=0.01, verbose=False, bonnorEbert=False):
     # Use 2% of the number of particles to pad the box 
     nPaddingParticles = int(paddingPercent * ngas)
 
@@ -93,11 +93,16 @@ def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType,
             pos[2,pID] = zTry
             pIDs[pID] = pID + 1
             pEnergy[pID] = pEnergy[0] * tempFactor
-            pMass[pID] = newParticleMass
+            
+            if bonnorEbert:
+                pMass[pID] = padDensity
+            else:
+                pMass[pID] = newParticleMass
+                
             pRho[pID] = 0.01 * cloudDensity
 
     return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)  
-    
+
 # Check if the particle is inside each shape's geometry
 def outsideBox(gridType, xTry, yTry, zTry, cloudDimensions, cloudCentre, cloudRadius):
     # Box geometry setups

@@ -59,12 +59,6 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     rCentre = rCentre * (np.max(rCentre) / rBonnorEbert)
     
     # Apply the density profile
-    mass = mass * rCharacteristic**2 / (rCharacteristic**2 + rCentre**2)
+    density = centralDensity * rCharacteristic**2 / (rCharacteristic**2 + rCentre**2)
     
-    # Work out the mass of the sphere
-    totMass = np.sum(mass)
-    
-    # Adjust to fit the desired mass
-    mass = mass * (beMass/totMass)
-    
-    return mass, pos
+    return density, pos

@@ -2,7 +2,7 @@
 import numpy as np
 
 # Function to add solid body rotation
-def addRotation(pos, pMass, vels, beta, verbose=False):
+def addRotation(pos, pMass, vels, beta, rotationRadius, verbose=False):
     # Find the centre of mass of the body
     mtot = np.sum(pMass) 
     xcom = np.sum(pMass * pos[0]) / mtot
@@ -16,11 +16,15 @@ def addRotation(pos, pMass, vels, beta, verbose=False):
     rMax = np.max([xmax, ymax, zmax]) 
 
     # Working out rotational velocity
-    omega = np.sqrt( 6.673e-8 * 3. * beta * mtot / (rMax**3))
+    omega = np.sqrt(6.673e-8 * 3. * beta * mtot / (rMax**3))
+    
+    # Working out each cells distance from the centre
+    rDist = np.sqrt((pos[0]-xcom)**2 + (pos[1]-ycom)**2 + (pos[2]-zcom)**2)
+    outsideRadius = np.where(rDist > rotationRadius*1.5e13)
 
     # Adding the rotation to the x and y velocities, rotating about the z axis
-    vels[0] -= omega * (pos[1] - ycom)
-    vels[1] += omega * (pos[0] - xcom)
+    vels[0][outsideRadius] -= omega * (pos[1][outsideRadius] - ycom)
+    vels[1][outsideRadius] += omega * (pos[0][outsideRadius] - xcom)
 
     # Working out gravitational potential energy
     eGrav = (6.67e-8) * (3./5.) * (mtot**2) / rMax
