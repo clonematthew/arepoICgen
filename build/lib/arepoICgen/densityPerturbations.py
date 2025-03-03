@@ -36,11 +36,16 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     beMass = beMass * 1.991e33
     
     # Calculate characteristic quantities 
-    rBonnorEbert = G * beMass / (2.42 * cs**2)
+    rBonnorEbert = 3.09e18 * 0.0043016 * (beMass/1.991e33) * 6.5 / ((cs/1e5)**2 * 15.85)
     print("Bonnor Ebert Radius: {:.2e}".format(rBonnorEbert))
-    centralDensity = (6.5**2 / np.sqrt(4 * np.pi)) * (cs**2 / G) * (1/rBonnorEbert**2)
+     
+    outsideRho = 1.66e-22
+    centralDensity = 14.305 * outsideRho
+    rCharacteristic = cs / (np.sqrt(4 * np.pi * G * centralDensity))
+
+    #centralDensity = (6.5**2 / np.sqrt(4 * np.pi)) * (cs**2 / G) * (1/rBonnorEbert**2)
     print("Central Density: {:.2e}".format(centralDensity))
-    rCharacteristic = cs / np.sqrt(4 * np.pi * G * centralDensity)
+    #rCharacteristic = cs / np.sqrt(4 * np.pi * G * centralDensity)
     print("Characteristic Radius: {:.2e}".format(rCharacteristic))
     
     # Create bins of radius and corresponding density
@@ -84,4 +89,4 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     cloudDensity = beMass / volume
     densityFrac = np.min(densityBins)/cloudDensity
 
-    return mass, pos, densityFrac, volume/(3.09e18**3)
+    return mass, pos, densityFrac/15, volume/(3.09e18**3)

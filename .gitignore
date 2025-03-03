@@ -1,6 +1,7 @@
 *.hdf5
 *.ipynb
 *.pyc
+*.f90
 .DS_Store
 __pycache__
 turbulenceGrids/
