@@ -127,7 +127,7 @@ def generateICs(config, params):
     # Add a Bonnor-Ebert density profile
     elif config["extras"] == "bonnorEbert":
         from .densityPerturbations import bonnorEbert
-        pMass, pos = bonnorEbert(ngas, pos, pMass, params["temp"], params["mu"], params["mass"])
+        pMass, pos, params["paddingDensity"], volume = bonnorEbert(ngas, pos, pMass, params["temp"], params["mu"], params["mass"])
 
     ##########################
     # Velocities: Turbulence #
@@ -185,11 +185,8 @@ def generateICs(config, params):
     # Pad the box with low density particles
     if config["padding"] == True:
         from .lowDensityPadding import padGeneric
-        
-        if config["extras"] == "bonnorEbert":
-            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=np.min(pMass), verbose=config["verbose"], bonnorEbert=True)
-        else:   
-            pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"], verbose=config["verbose"])
+
+        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"], verbose=config["verbose"])
     else:
         ngasAll = ngas
 
@@ -218,12 +215,7 @@ def generateICs(config, params):
     pos = pos / uDist
     vels = vels / uVelo
     pEnergy = pEnergy / uEner
-    
-    if config["extras"] == "bonnorEbert":
-        # Bonnor Ebert must be output as density
-        pDensity = pMass / (uMass / (uDist**3))
-    else:
-        pMass = pMass / uMass
+    pMass = pMass / uMass
 
     ##############################
     # Desired Density Conversion #
@@ -253,7 +245,7 @@ def generateICs(config, params):
             hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, config["bField"])
 
         # Writing density to mass
-        elif config["outValue"] == "density" or config["extras"] == "bonnorEbert":
+        elif config["outValue"] == "density":
             # Write the particle data as a hdf5 file
             hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, config["bField"], True, pDensity)
     else:

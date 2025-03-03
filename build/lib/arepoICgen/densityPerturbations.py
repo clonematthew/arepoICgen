@@ -43,6 +43,10 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     rCharacteristic = cs / np.sqrt(4 * np.pi * G * centralDensity)
     print("Characteristic Radius: {:.2e}".format(rCharacteristic))
     
+    # Create bins of radius and corresponding density
+    radiusBins = 10**np.linspace(0, np.log10(rBonnorEbert), 1000)
+    densityBins = centralDensity * rCharacteristic**2 / (rCharacteristic**2 + radiusBins**2)
+
     # Find the centre of mass
     totMass = np.sum(mass)
     xC = np.sum(pos[0] * mass) / totMass
@@ -57,8 +61,27 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     pos[1] = rBonnorEbert * pos[1] / np.max(rCentre)
     pos[2] = rBonnorEbert * pos[2] / np.max(rCentre)
     rCentre = rBonnorEbert * rCentre / np.max(rCentre) 
-
-    # Apply the density profile
-    density = centralDensity * rCharacteristic**2 / (rCharacteristic**2 + rCentre**2)
     
-    return density, pos
+    # Scale the mass of each particle
+    for i in range(len(radiusBins)-1): 
+        inRadius = np.where((rCentre > radiusBins[i]) & (rCentre < radiusBins[i+1]))
+            
+        # Work out how much mass should be in each shell
+        shellMass = (4 * np.pi / 3) * (radiusBins[i+1]**3 - radiusBins[i]**3) * densityBins[i] 
+        
+        # Find the total mass of particles in this shell and scale
+        cellMass = shellMass / len(inRadius[0])
+        
+        # Assign value
+        mass[inRadius] = cellMass
+        
+    # Scale masses
+    totMass = np.sum(mass)
+    mass = mass * (beMass / totMass)
+        
+    # Work out cloud density
+    volume = ((4 * np.pi / 3) * rBonnorEbert**3)
+    cloudDensity = beMass / volume
+    densityFrac = np.min(densityBins)/cloudDensity
+
+    return mass, pos, densityFrac, volume/(3.09e18**3)

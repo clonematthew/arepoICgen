@@ -3,7 +3,7 @@ import numpy as np
 from random import random 
 
 # Generic function for the padding
-def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02, padDensity=0.01, verbose=False, bonnorEbert=False):
+def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType, tempFactor, paddingPercent=0.02, padDensity=0.01, verbose=False):
     # Use 2% of the number of particles to pad the box 
     nPaddingParticles = int(paddingPercent * ngas)
 
@@ -71,7 +71,7 @@ def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType,
     pRho = pRho * cloudDensity
 
     # Calculating mass of the particles we'll pad with 
-    newParticleMass = (padDensity * cloudDensity) * (cloudVolume) / nPaddingParticles 
+    newParticleMass = (padDensity * cloudDensity) * (boxVolume-cloudVolume) / nPaddingParticles 
 
     # Randomly spraying the particles around the box
     placedPoints = 0 
@@ -93,13 +93,8 @@ def padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, boxDims, gridType,
             pos[2,pID] = zTry
             pIDs[pID] = pID + 1
             pEnergy[pID] = pEnergy[0] * tempFactor
-            
-            if bonnorEbert:
-                pMass[pID] = padDensity
-            else:
-                pMass[pID] = newParticleMass
-                
-            pRho[pID] = 0.01 * cloudDensity
+            pMass[pID] = newParticleMass 
+            pRho[pID] = padDensity * cloudDensity
 
     return pos, vels, pMass, pIDs, pEnergy, pRho, (ngas+nPaddingParticles)  
 
