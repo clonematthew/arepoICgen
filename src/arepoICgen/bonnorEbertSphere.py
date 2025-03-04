@@ -106,40 +106,9 @@ def solveLEequation(dimensionlessRadius):
         
     return radiusFunc, massFunc, densityFunc, densityContrast, dimensionlessMass, interpolatedRadius
 
-# Create a BE sphere
-def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddingDensityContrast=30):
-    # Solve the LE equation
-    radiusFunc, massFunc, densityFunc, densityContrast, dimensionlessMass, interpolatedRadius = solveLEequation(dimensionlessRadius)
-    
-    # Calculate sound speed of the sphere
-    cs = np.sqrt(kB * temperature / (mu * 1.66e-24))
-    
-    # Calculate the boundary radius in pc
-    rBoundary = 0.0043016 * BEmass * dimensionlessRadius / ((cs/1e5)**2 * dimensionlessMass)  
-    
-    # Calculate the number of particles to pad the box with
-    ppLag = dimensionlessRadius**3 * np.exp(-densityContrast) * ngas / (12.566371 * dimensionlessMass * paddingDensityContrast)
-    fB = 1 + (2 * 10 * 1.2 / (ppLag**0.33333))
-    halfWidthOfDomain = fB * rBoundary
-    nPaddingParticles = int(((8 * fB**3) - 4.1887902) * ppLag)
-
-    # Estimate the total number of particles
-    nTotal = ngas + nPaddingParticles
-
-    # Work out analytical number of particles
-    ffB = 1 + (((5.1961524 * fB**3 - 1.) * dimensionlessRadius**3 * np.exp(-densityContrast)) / (3 * dimensionlessMass * paddingDensityContrast))
-    ppTOT = int(1.9098593 * ngas * ffB)
-
-    # Work out number density of particles
-    nn0 = 0.23873241 * ffB * ngas / (halfWidthOfDomain**3)
-
-    # Work out pre-stretch radius of the sphere
-    rrB = halfWidthOfDomain / (ffB**0.33333)
-
-    # Work out mass coefficient inside radius
-    Cmm = ffB / (halfWidthOfDomain**3)
-    fffB = (3 * paddingDensityContrast * dimensionlessMass) / ((fB * dimensionlessRadius)**3 * np.exp(-densityContrast))
-    
+# Loop to place particles with (for speed)
+@jit(nopython=True)
+def particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolatedRadius, ffB, fffB):
     # Setup positions of the cube
     spacing = (np.sqrt(2)/nn0)**0.3333333
 
@@ -192,12 +161,10 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
     r = np.zeros((3,pTotal))
     p = 0
     pInSphere = 0
-    
-    rotMaxtrix = randonRotationMatrix()
 
     rB3 = rBoundary**3
     X03 = halfWidthOfDomain**3
-
+    
     # Loop through each axis
     for i in range(iMAX):
         for j in range(jMAX):
@@ -217,10 +184,8 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
                         
                         # Check if outisde domain
                         if (abs(r[2,p]) < halfWidthOfDomain):
-                            # Rotate the particle by the random matrix
-                            r[0,p] = rotMaxtrix[0,0] * r[0,p] + rotMaxtrix[0,1] * r[1,p] + rotMaxtrix[0,2] * r[2,p]   
-                            r[1,p] = rotMaxtrix[1,0] * r[0,p] + rotMaxtrix[1,1] * r[1,p] + rotMaxtrix[1,2] * r[2,p]   
-                            r[2,p] = rotMaxtrix[2,0] * r[0,p] + rotMaxtrix[2,1] * r[1,p] + rotMaxtrix[2,2] * r[2,p]   
+                            # Rotate the particle by the random matrix  
+                            r[:,p] = rotMatrix[0]*r[0,p] + rotMatrix[1]*r[1,p] + rotMatrix[2]*r[2,p]
                             
                             # Find the radius of this particle
                             rrMAG = r[0,p]**2 + r[1,p]**2 + r[2,p]**2
@@ -252,6 +217,45 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
                                 
                             if abs(r[0,p]) < halfWidthOfDomain and abs(r[1,p]) < halfWidthOfDomain and abs(r[2,p]) < halfWidthOfDomain:
                                 p += 1  
+    return r, p, pInSphere
+
+# Create a BE sphere
+def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddingDensityContrast=30):
+    # Solve the LE equation
+    radiusFunc, massFunc, densityFunc, densityContrast, dimensionlessMass, interpolatedRadius = solveLEequation(dimensionlessRadius)
+    
+    # Calculate sound speed of the sphere
+    cs = np.sqrt(kB * temperature / (mu * 1.66e-24))
+    
+    # Calculate the boundary radius in pc
+    rBoundary = 0.0043016 * BEmass * dimensionlessRadius / ((cs/1e5)**2 * dimensionlessMass)  
+    
+    # Calculate the number of particles to pad the box with
+    ppLag = dimensionlessRadius**3 * np.exp(-densityContrast) * ngas / (12.566371 * dimensionlessMass * paddingDensityContrast)
+    fB = 1 + (2 * 10 * 1.2 / (ppLag**0.33333))
+    halfWidthOfDomain = fB * rBoundary
+    nPaddingParticles = int(((8 * fB**3) - 4.1887902) * ppLag)
+
+    # Estimate the total number of particles
+    nTotal = ngas + nPaddingParticles
+
+    # Work out analytical number of particles
+    ffB = 1 + (((5.1961524 * fB**3 - 1.) * dimensionlessRadius**3 * np.exp(-densityContrast)) / (3 * dimensionlessMass * paddingDensityContrast))
+    ppTOT = int(1.9098593 * ngas * ffB)
+
+    # Work out number density of particles
+    nn0 = 0.23873241 * ffB * ngas / (halfWidthOfDomain**3)
+
+    # Work out pre-stretch radius of the sphere
+    rrB = halfWidthOfDomain / (ffB**0.33333)
+
+    # Work out mass coefficient inside radius
+    Cmm = ffB / (halfWidthOfDomain**3)
+    fffB = (3 * paddingDensityContrast * dimensionlessMass) / ((fB * dimensionlessRadius)**3 * np.exp(-densityContrast))
+   
+    # Generate the particle positions
+    rotMatrix = randonRotationMatrix()
+    r, p, pInSphere = particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolatedRadius, ffB, fffB)
                                 
     # Cull zero values
     pos = np.zeros((3, p))
@@ -267,10 +271,8 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
 
 # Function to create a random rotation matrix to rotate particles by
 def randonRotationMatrix():
-    # Get a random angle
-    psi = 2 * np.pi * np.random.random(1)
-    
     # Calculate sin and cos of psi
+    psi = 2 * np.pi * np.random.random(1)
     cosPsi = np.cos(psi)
     sinPsi = np.sin(psi)
     
