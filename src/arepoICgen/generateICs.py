@@ -126,8 +126,11 @@ def generateICs(config, params):
         
     # Add a Bonnor-Ebert density profile
     elif config["extras"] == "bonnorEbert":
-        from .densityPerturbations import bonnorEbert
-        pMass, pos, params["paddingDensity"], volume = bonnorEbert(ngas, pos, pMass, params["temp"], params["mu"], params["mass"])
+        #from .densityPerturbations import bonnorEbert
+        #pMass, pos, params["paddingDensity"], volume = bonnorEbert(ngas, pos, pMass, params["temp"], params["mu"], params["mass"])
+        from .bonnorEbertSphere import createBEsphere
+        
+        pos, pMass, ngas = createBEsphere(params["mass"], ngas, params["temp"], params["mu"])
 
     ##########################
     # Velocities: Turbulence #

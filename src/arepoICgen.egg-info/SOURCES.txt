@@ -4,6 +4,7 @@ setup.cfg
 setup.py
 src/arepoICgen/__init__.py
 src/arepoICgen/arepoOut.py
+src/arepoICgen/bonnorEbertSphere.py
 src/arepoICgen/boxCreation.py
 src/arepoICgen/densityPerturbations.py
 src/arepoICgen/generateICs.py
