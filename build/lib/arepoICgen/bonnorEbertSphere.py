@@ -1,5 +1,6 @@
 # Import libraries
 import numpy as np
+from numba import jit
 
 # Some useful constants
 G = 6.67e-8
@@ -191,6 +192,8 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
     r = np.zeros((3,pTotal))
     p = 0
     pInSphere = 0
+    
+    rotMaxtrix = randonRotationMatrix()
 
     rB3 = rBoundary**3
     X03 = halfWidthOfDomain**3
@@ -214,6 +217,11 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
                         
                         # Check if outisde domain
                         if (abs(r[2,p]) < halfWidthOfDomain):
+                            # Rotate the particle by the random matrix
+                            r[0,p] = rotMaxtrix[0,0] * r[0,p] + rotMaxtrix[0,1] * r[1,p] + rotMaxtrix[0,2] * r[2,p]   
+                            r[1,p] = rotMaxtrix[1,0] * r[0,p] + rotMaxtrix[1,1] * r[1,p] + rotMaxtrix[1,2] * r[2,p]   
+                            r[2,p] = rotMaxtrix[2,0] * r[0,p] + rotMaxtrix[2,1] * r[1,p] + rotMaxtrix[2,2] * r[2,p]   
+                            
                             # Find the radius of this particle
                             rrMAG = r[0,p]**2 + r[1,p]**2 + r[2,p]**2
                             
@@ -256,3 +264,38 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
     pMass = np.ones(p) * (BEmass * 1.991e33 / pInSphere) 
 
     return pos, pMass, ngas
+
+# Function to create a random rotation matrix to rotate particles by
+def randonRotationMatrix():
+    # Get a random angle
+    psi = 2 * np.pi * np.random.random(1)
+    
+    # Calculate sin and cos of psi
+    cosPsi = np.cos(psi)
+    sinPsi = np.sin(psi)
+    
+    # Calculate sin and cos of theta
+    theta = np.random.random(1)
+    cosTheta = 2 * theta - 1
+    sinTheta = np.sqrt(1 - cosTheta**2)
+    
+    # Calculate sin and cos of phi
+    phi = 2 * np.pi * np.random.random(1)
+    cosPhi = np.cos(phi)
+    sinPhi = np.sin(phi)
+    
+    # Create the matrix
+    rotationMatrix = np.zeros((3,3))
+    
+    # Assign values of the matrix
+    rotationMatrix[0,0] = (cosPhi * cosPsi) - (sinPhi * cosTheta * sinPsi)
+    rotationMatrix[1,0] = (cosPhi * sinPsi) + (sinPhi * cosTheta * cosPsi)
+    rotationMatrix[2,0] = sinPhi * sinTheta
+    rotationMatrix[0,1] = - (sinPhi * cosPsi) - (cosPhi * cosTheta * sinPsi)
+    rotationMatrix[1,1] = - (sinPhi * sinPsi) + (cosPhi * cosTheta * cosPsi)
+    rotationMatrix[2,1] = cosPhi * sinTheta 
+    rotationMatrix[0,2] = sinTheta * sinPsi
+    rotationMatrix[1,2] = - sinTheta * cosPsi
+    rotationMatrix[2,2] = cosTheta  
+    
+    return rotationMatrix 
