@@ -108,7 +108,7 @@ def solveLEequation(dimensionlessRadius):
 
 # Loop to place particles with (for speed)
 @jit(nopython=True)
-def particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolatedRadius, ffB, fffB):
+def particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolatedRadius, ffB, fffB, tempFactor):
     # Setup positions of the cube
     spacing = (np.sqrt(2)/nn0)**0.3333333
 
@@ -157,8 +157,10 @@ def particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolated
     # Calculate total number of particles
     pTotal = iMAX * jMAX * kMAX
 
-    # Create array of positions
+    # Create array of positions and temperatures
     r = np.zeros((3,pTotal))
+    t = np.zeros(pTotal)
+    
     p = 0
     pInSphere = 0
 
@@ -207,8 +209,10 @@ def particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolated
                                     
                                     # Calculate radius post-stretch
                                     rMAG = rBoundary * 10**((T - iLO) * interpolatedRadius[iHI+9499] + (iHI - T) * interpolatedRadius[iLO+9499])
+                                    t[p] = 1
                                 else:
                                     rMAG = (rB3 + fffB * ((ffB * rrMAG**3) - X03))**0.3333333
+                                    t[p] = tempFactor
                                 
                                 # Scale the radius position
                                 r[0,p] = (rMAG / rrMAG) * r[0,p]
@@ -217,10 +221,11 @@ def particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolated
                                 
                             if abs(r[0,p]) < halfWidthOfDomain and abs(r[1,p]) < halfWidthOfDomain and abs(r[2,p]) < halfWidthOfDomain:
                                 p += 1  
-    return r, p, pInSphere
+                                
+    return r, p, pInSphere, t
 
 # Create a BE sphere
-def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddingDensityContrast=30):
+def createBEsphere(BEmass, ngas, temperature, mu, paddingDensityContrast, tempFactor, dimensionlessRadius=6.5):
     # Solve the LE equation
     radiusFunc, massFunc, densityFunc, densityContrast, dimensionlessMass, interpolatedRadius = solveLEequation(dimensionlessRadius)
     
@@ -231,7 +236,7 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
     rBoundary = 0.0043016 * BEmass * dimensionlessRadius / ((cs/1e5)**2 * dimensionlessMass)  
     
     # Calculate the number of particles to pad the box with
-    ppLag = dimensionlessRadius**3 * np.exp(-densityContrast) * ngas / (12.566371 * dimensionlessMass * paddingDensityContrast)
+    ppLag = dimensionlessRadius**3 * np.exp(-densityContrast) * ngas / (12.566371 * dimensionlessMass * (1/paddingDensityContrast))
     fB = 1 + (2 * 10 * 1.2 / (ppLag**0.33333))
     halfWidthOfDomain = fB * rBoundary
     nPaddingParticles = int(((8 * fB**3) - 4.1887902) * ppLag)
@@ -240,7 +245,7 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
     nTotal = ngas + nPaddingParticles
 
     # Work out analytical number of particles
-    ffB = 1 + (((5.1961524 * fB**3 - 1.) * dimensionlessRadius**3 * np.exp(-densityContrast)) / (3 * dimensionlessMass * paddingDensityContrast))
+    ffB = 1 + (((5.1961524 * fB**3 - 1.) * dimensionlessRadius**3 * np.exp(-densityContrast)) / (3 * dimensionlessMass * (1/paddingDensityContrast)))
     ppTOT = int(1.9098593 * ngas * ffB)
 
     # Work out number density of particles
@@ -251,23 +256,24 @@ def createBEsphere(BEmass, ngas, temperature, mu, dimensionlessRadius=6.5, paddi
 
     # Work out mass coefficient inside radius
     Cmm = ffB / (halfWidthOfDomain**3)
-    fffB = (3 * paddingDensityContrast * dimensionlessMass) / ((fB * dimensionlessRadius)**3 * np.exp(-densityContrast))
+    fffB = (3 * (1/paddingDensityContrast) * dimensionlessMass) / ((fB * dimensionlessRadius)**3 * np.exp(-densityContrast))
    
     # Generate the particle positions
     rotMatrix = randonRotationMatrix()
-    r, p, pInSphere = particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolatedRadius, ffB, fffB)
+    r, p, pInSphere, t = particleLoop(nn0, rBoundary, halfWidthOfDomain, rotMatrix, Cmm, interpolatedRadius, ffB, fffB, tempFactor)
                                 
     # Cull zero values
     pos = np.zeros((3, p))
     pos[0] = r[0][:p] * 3.09e18
     pos[1] = r[1][:p] * 3.09e18
     pos[2] = r[2][:p] * 3.09e18
+    pTemp = t[:p]
                                 
     # Work out mass of the particles
     ngas = p
     pMass = np.ones(p) * (BEmass * 1.991e33 / pInSphere) 
 
-    return pos, pMass, ngas
+    return pos, pMass, ngas, pTemp
 
 # Function to create a random rotation matrix to rotate particles by
 def randonRotationMatrix():
