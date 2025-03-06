@@ -75,6 +75,8 @@ def solveLEequation(dimensionlessRadius):
     interpolatedMass = 0.001 * np.arange(-9500, 0, 1)
     interpolatedRadius = np.zeros(9500)
     
+    massFunc *= 2
+    
     # Initialise x and y old values to very low
     xOLD = -99
     yOLD = -99
@@ -233,7 +235,7 @@ def createBEsphere(BEmass, ngas, temperature, mu, paddingDensityContrast, tempFa
     cs = np.sqrt(kB * temperature / (mu * 1.66e-24))
     
     # Calculate the boundary radius in pc
-    rBoundary = 0.0043016 * BEmass * dimensionlessRadius / ((cs/1e5)**2 * dimensionlessMass)  
+    rBoundary = 0.0043016 * (BEmass/2) * dimensionlessRadius / ((cs/1e5)**2 * dimensionlessMass)  
     
     # Calculate the number of particles to pad the box with
     ppLag = dimensionlessRadius**3 * np.exp(-densityContrast) * ngas / (12.566371 * dimensionlessMass * (1/paddingDensityContrast))
@@ -271,9 +273,9 @@ def createBEsphere(BEmass, ngas, temperature, mu, paddingDensityContrast, tempFa
                                 
     # Work out mass of the particles
     ngas = p
-    pMass = np.ones(p) * (BEmass * 1.991e33 / pInSphere) 
+    pMass = np.ones(p) * ((BEmass/2) * 1.991e33 / pInSphere) 
 
-    return pos, pMass, ngas, pTemp
+    return pos, pMass, ngas, pTemp, rBoundary
 
 # Function to create a random rotation matrix to rotate particles by
 def randonRotationMatrix():
@@ -307,3 +309,25 @@ def randonRotationMatrix():
     rotationMatrix[2,2] = cosTheta  
     
     return rotationMatrix 
+
+# Function to adjust the properties of the BE sphere to make it collapse
+def adjustProperties(pos, vels, pMass, rBoundary):
+    # Calculate centre of mass and radial distance to it
+    com = np.sum(pos[0] * pMass) / np.sum(pMass)
+    rCentre = np.sqrt((pos[0] - com)**2 + (pos[1] - com)**2 + (pos[2] - com)**2)
+    
+    # Find padding particles
+    padding = np.where(rCentre >= rBoundary*3.09e18)
+    inside = np.where(rCentre < rBoundary*3.09e18)
+    
+    # Reset their velocites
+    vels[0][padding] = 0
+    vels[1][padding] = 0
+    vels[2][padding] = 0
+    
+    # Adjust the masses
+    pMass[padding] *= 0.1
+    pMass[inside] *= 2
+    
+    return vels, pMass
+    

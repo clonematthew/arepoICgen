@@ -1,11 +1,17 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.2
 Name: arepoICgen
-Version: 0.1.14
+Version: 0.1.15
 Summary: Package for generating initial conditions for AREPO
 Home-page: https://github.com/clonematthew/arepoICgen
 Author: Matt Cusack
 Author-email: cusackmt@cardiff.ac.uk
 Description-Content-Type: text/markdown
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: summary
 
 [![PyPI package](https://img.shields.io/badge/pip%20install-arepoICgen-brightgreen)](https://pypi.org/project/arepoICgen/) 
 [![version number](https://img.shields.io/pypi/v/arepoICgen?color=green&label=version)](https://github.com/clonematthew/arepoICgen/releases)

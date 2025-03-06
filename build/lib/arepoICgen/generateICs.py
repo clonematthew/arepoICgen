@@ -127,7 +127,7 @@ def generateICs(config, params):
     # Add a Bonnor-Ebert density profile
     elif config["extras"] == "bonnorEbert":
         from .bonnorEbertSphere import createBEsphere
-        pos, pMass, ngas, pTemp = createBEsphere(params["mass"], ngas, params["temp"], params["mu"], params["paddingDensity"], params["tempFactor"])
+        pos, pMass, ngas, pTemp, rBoundary = createBEsphere(params["mass"], ngas, params["temp"], params["mu"], params["paddingDensity"], params["tempFactor"])
         pEnergy = pEnergy[0] * pTemp
 
     ##########################
@@ -171,7 +171,17 @@ def generateICs(config, params):
 
         # Add rotation around z axis of given beta energy ratio
         vels = addRotation(pos, pMass, vels, params["beta"], params["rotationRadius"], config["verbose"])
-
+        
+    ############################
+    # Reset BE Cell Properties #
+    ############################
+    
+    # Adjust the properties of the BE sphere
+    if config["extras"] == "bonnorEbert":
+        from .bonnorEbertSphere import adjustProperties
+        
+        vels, pMass = adjustProperties(pos, vels, pMass, rBoundary)
+        
     ###################################
     # Setting particle identification #
     ###################################
