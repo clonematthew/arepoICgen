@@ -92,7 +92,7 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     return mass, pos, densityFrac/15, volume/(3.09e18**3)
 
 # Create a simple centrally-condensed density profile
-def centrallyCondensedSphere(ngas, pos, pMass, mass, densityGradient=-1.5):
+def centrallyCondensedSphere(ngas, pos, pMass, mass, rFlat, densityGradient=-1.5):
     # Calculate the centre of mass
     xcom = np.sum(pos[0] * pMass) / np.sum(pMass)
     ycom = np.sum(pos[1] * pMass) / np.sum(pMass)
@@ -102,7 +102,22 @@ def centrallyCondensedSphere(ngas, pos, pMass, mass, densityGradient=-1.5):
     rCentre = np.sqrt((pos[0] - xcom)**2 + (pos[1] - ycom)**2 + (pos[2] - zcom)**2)
     
     # Scale the masses 
-    pMass = pMass[0] * rCentre**(densityGradient - 1)
+    densityProfile = (rFlat**(-1 * densityGradient + 1) / (rFlat**(-1 * densityGradient + 1) + rCentre**(-1 * densityGradient + 1)) / np.max(rCentre))
+    
+    rBins = np.linspace(0, np.max(rCentre), 1000)
+    for i in range(len(rBins)-1):
+        inBin = np.where((rCentre > rBins[i]) & (rCentre < rBins[i+1]))
+        
+        vol = 4 * np.pi * (rBins[i+1]**3 - rBins[i]**3) / 2
+        massInBin = vol * (rFlat**(-1 * densityGradient + 1) / (rFlat**(-1 * densityGradient + 1) + ((rBins[i]+rBins[i+1])/2)**(-1 * densityGradient + 1)) / np.max(rCentre))
+        
+        cellMass = massInBin / len(inBin[0])
+        pMass[inBin] = cellMass
+        
+    #pMass = pMass[0] * (rFlat**(-1 * densityGradient + 1) / (rFlat**(-1 * densityGradient + 1) + rCentre**(-1 * densityGradient + 1)) / np.max(rCentre))
+    
+    #pMass = pMass[0] * rCentre**(densityGradient - 1)
+    #pMass = pMass[0] * rFlat**2 / (rFlat**2 + rCentre**2)
     pMass = pMass * (mass*1.991e33 / np.sum(pMass))
     
     densityFraction = 0.1 * np.min(pMass) / np.mean(pMass)

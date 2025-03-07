@@ -134,7 +134,7 @@ def generateICs(config, params):
     elif config["extras"] == "centrallyCondensed":
         from .densityPerturbations import centrallyCondensedSphere
         
-        pos, pMass, params["paddingDensity"] = centrallyCondensedSphere(ngas, pos, pMass, params["mass"])
+        pos, pMass, params["paddingDensity"] = centrallyCondensedSphere(ngas, pos, pMass, params["mass"], params["flat"])
 
     ##########################
     # Velocities: Turbulence #
