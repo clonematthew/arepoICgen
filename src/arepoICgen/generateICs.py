@@ -129,6 +129,12 @@ def generateICs(config, params):
         from .bonnorEbertSphere import createBEsphere
         pos, pMass, ngas, pTemp, rBoundary = createBEsphere(params["mass"], ngas, params["temp"], params["mu"], params["paddingDensity"], params["tempFactor"])
         pEnergy = pEnergy[0] * pTemp
+        
+    # Add a centrally condensed density profile
+    elif config["extras"] == "centrallyCondensed":
+        from .densityPerturbations import centrallyCondensedSphere
+        
+        pos, pMass, params["paddingDensity"] = centrallyCondensedSphere(ngas, pos, pMass, params["mass"])
 
     ##########################
     # Velocities: Turbulence #

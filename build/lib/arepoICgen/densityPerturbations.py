@@ -90,3 +90,21 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     densityFrac = np.min(densityBins)/cloudDensity
 
     return mass, pos, densityFrac/15, volume/(3.09e18**3)
+
+# Create a simple centrally-condensed density profile
+def centrallyCondensedSphere(ngas, pos, pMass, mass, densityGradient=-1.5):
+    # Calculate the centre of mass
+    xcom = np.sum(pos[0] * pMass) / np.sum(pMass)
+    ycom = np.sum(pos[1] * pMass) / np.sum(pMass)
+    zcom = np.sum(pos[2] * pMass) / np.sum(pMass)
+    
+    # Find radial distance to the CoM
+    rCentre = np.sqrt((pos[0] - xcom)**2 + (pos[1] - ycom)**2 + (pos[2] - zcom)**2)
+    
+    # Scale the masses 
+    pMass = pMass[0] * rCentre**(densityGradient - 1)
+    pMass = pMass * (mass*1.991e33 / np.sum(pMass))
+    
+    densityFraction = 0.1 * np.min(pMass) / np.mean(pMass)
+        
+    return pos, pMass, densityFraction
