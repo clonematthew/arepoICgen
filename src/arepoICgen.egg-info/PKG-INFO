@@ -1,6 +1,6 @@
 Metadata-Version: 2.2
 Name: arepoICgen
-Version: 0.1.18
+Version: 0.1.19
 Summary: Package for generating initial conditions for AREPO
 Home-page: https://github.com/clonematthew/arepoICgen
 Author: Matt Cusack
