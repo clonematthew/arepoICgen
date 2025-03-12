@@ -92,10 +92,8 @@ def bonnorEbert(ngas, pos, mass, temp, mu, beMass):
     return mass, pos, densityFrac/15, volume/(3.09e18**3)
 
 # Create a centrally condensed density profile
-def centrallyCondensedSphere(ngas, pos, pMass, mass):
+def centrallyCondensedSphere(ngas, pos, pMass, mass, flatFraction, centralDensity):
     # Calculate the radius of the sphere
-    centralDensity = 1e-20
-    flatFraction = 0.1
     rSphere = (mass * 1.991e33 / (4 * np.pi * centralDensity * flatFraction**3 * (-1 * np.arctan(1/flatFraction) + (1/flatFraction))))**(1/3)
     print("Creating Sphere of Radius {:.2e} m".format(rSphere))
     
