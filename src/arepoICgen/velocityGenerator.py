@@ -1,8 +1,75 @@
-# Importing libraries
+# Needed libraries
 import numpy as np
-from scipy.io import FortranFile
 from numba import jit
+from scipy.io import FortranFile
 
+# Function to generate velocities for the cloud
+def addVelocities(positions, masses, energies, config, params):
+    # Check if turbulence is desired
+    if config["turbulence"] == "static":
+        # Generate zeros array for the velocities
+        velocities = np.zeros((3, len(masses)), dtype=np.float64)  
+         
+    elif config["turbulence"] == "turbFile":
+        print("Assigning turbulent velocities")
+        # Loading in the turbulent velocities from the velocity cube
+        velx, vely, velz = turbulenceFromFile(int(config["turbSize"]), config["turbFile"])
+
+        # Branch for the box scenarios
+        if config["grid"] == "boxGrid" or config["grid"] == "boxRan":
+            # Interpolating and assignning velocities
+            velocities = boxGridTurbulence(velx, vely, velz, positions, masses, energies, int(config["turbSize"]), params["virialParam"])
+
+        # Branch for the spherical scenarios
+        else:
+            # Interpolating and assigning velocities
+            velocities = sphericalGridTurbulence(velx, vely, velz, positions, masses, energies, int(config["turbSize"]), params["virialParam"])
+            
+    # Check if rotation is desired
+    if config["rotation"] == "rotation":
+        # Add rotation around z axis of given beta energy ratio
+        velocities = addRotation(positions, masses, velocities, params["beta"], params["rotationRadius"], config["verbose"])
+        
+    return velocities
+
+# Function to add solid body rotation
+def addRotation(pos, pMass, vels, beta, rotationRadius, verbose=False):
+    # Find the centre of mass of the body
+    mtot = np.sum(pMass) 
+    xcom = np.sum(pMass * pos[0]) / mtot
+    ycom = np.sum(pMass * pos[1]) / mtot
+    zcom = np.sum(pMass * pos[2]) / mtot
+
+    # Working out rmax of the sphere
+    xmax = np.max(pos[0]) - xcom
+    ymax = np.max(pos[1]) - ycom
+    zmax = np.max(pos[2]) - zcom
+    rMax = np.max([xmax, ymax, zmax]) 
+
+    # Working out rotational velocity
+    omega = np.sqrt(6.673e-8 * 3. * beta * mtot / (rMax**3))
+    
+    # Working out each cells distance from the centre
+    rDist = np.sqrt((pos[0]-xcom)**2 + (pos[1]-ycom)**2 + (pos[2]-zcom)**2)
+    outsideRadius = np.where(rDist > rotationRadius*1.5e13)
+
+    # Adding the rotation to the x and y velocities, rotating about the z axis
+    vels[0][outsideRadius] -= omega * (pos[1][outsideRadius] - ycom)
+    vels[1][outsideRadius] += omega * (pos[0][outsideRadius] - xcom)
+
+    # Working out gravitational potential energy
+    eGrav = (6.67e-8) * (3./5.) * (mtot**2) / rMax
+ 
+    # Working out the rotational energy
+    momentOfInteria = (2/5) * mtot * rMax**2
+    eRot = (1/2) * momentOfInteria * omega**2
+
+    if verbose:
+        # Reporting the deviation from the desired beta value
+        print("Difference from desired beta: {:.2f}%".format(abs(100*(beta-eRot/eGrav)/beta)))
+
+    return vels
+       
 # Function to load in the velocities from file
 def turbulenceFromFile(gridSize, filename):
     # Loading in the fortran file using sciPy
@@ -122,7 +189,7 @@ def turbLoopSphere(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli):
     return vels  
 
 # Function to centre and scale velocities
-def scaleVelocities(ngas, vels, pMass, radnorm, epsilon):
+def scaleVelocities(ngas, vels, pMass, pEner, radnorm, epsilon):
     # Finding total mass
     mtot = np.sum(pMass)
 
@@ -142,13 +209,13 @@ def scaleVelocities(ngas, vels, pMass, radnorm, epsilon):
 
     # Finding the total kinetic energy of the cloud
     absVel = (vels[0]**2 + vels[1]**2 + vels[2]**2)
-    eKinetic = np.sum(absVel * pMass * 0.5)
-
+    eSupport = np.sum(absVel * pMass * 0.5) #+ np.sum(pEner)
+    
     # Calculate the gravitational potential of the cloud
     ePotential = 6.67e-8 * (3/5) * mtot * mtot / radnorm
 
     ## FOR SCALING BY VIRIAL EQUILIBRIUM
-    scalingFactor = np.sqrt((ePotential/eKinetic) / epsilon)
+    scalingFactor = np.sqrt(((ePotential/epsilon) - np.sum(pEner)) / eSupport)
 
     # Scaling velocities
     vels = vels * scalingFactor
@@ -156,7 +223,7 @@ def scaleVelocities(ngas, vels, pMass, radnorm, epsilon):
     return vels
 
 # Function to interpolate velocities for a box grid
-def boxGridTurbulence(velx, vely, velz, pos, pMass, gridSize, epsilon):
+def boxGridTurbulence(velx, vely, velz, pos, pMass, pEner, gridSize, epsilon):
     # Moving the box to have no negative values
     xmin = np.min(pos[0])
     if xmin < 0:
@@ -184,12 +251,12 @@ def boxGridTurbulence(velx, vely, velz, pos, pMass, gridSize, epsilon):
     vels = turbLoopBox(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli)
 
     # Scaling the velocities by the required amount
-    vels = scaleVelocities(ngas, vels, pMass, radnorm, epsilon)
+    vels = scaleVelocities(ngas, vels, pMass, pEner, radnorm, epsilon)
 
     return vels
 
 # Function to interpolate the velocities for a spherical grid
-def sphericalGridTurbulence(velx, vely, velz, pos, pMass, gridSize, epsilon):
+def sphericalGridTurbulence(velx, vely, velz, pos, pMass, pEner, gridSize, epsilon):
 
     # Finding the centre of mass
     ngas = len(pMass)
@@ -218,19 +285,6 @@ def sphericalGridTurbulence(velx, vely, velz, pos, pMass, gridSize, epsilon):
     vels = turbLoopSphere(ngas, pos, vels, radnorm, gridSize, velx, vely, velz, deli)
     
     # Scaling the velocities by the required amount
-    vels = scaleVelocities(ngas, vels, pMass, radnorm, epsilon)
+    vels = scaleVelocities(ngas, vels, pMass, pEner, radnorm, epsilon)
 
     return vels
-
-
-
-    
-
-
-
-
-
-
-
-
-    

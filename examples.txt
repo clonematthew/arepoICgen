@@ -2,8 +2,7 @@
 
 config = {
     "grid": "sphereGrid",
-    "padding": True,
-    "output": "hdf5",
+    "padBox": True,
     "filename": "uSphereStatic"
 }
 
@@ -27,8 +26,7 @@ config = {
     "turbulence": "turbFile",
     "turbFile": "./vel3D.bin",
     "turbSize": 128,
-    "padding": True,
-    "output": "hdf5",
+    "padBox": True,
     "filename": "turbulentCylinder"
 }
 
@@ -52,8 +50,7 @@ generateICs(config, params)
 config = {
     "grid": "ellipseRan",
     "rotation": "rotation",
-    "padding": True,
-    "output": "hdf5",
+    "padBox": True,
     "filename": "ellipseSpin"    
 }
 

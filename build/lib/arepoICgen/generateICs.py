@@ -1,306 +1,219 @@
-######################################
-# AREPO Initial Conditions Generator #
-# mc 18/10/2023 based on work by pcc #
-######################################
+'''
+                                                  /$$$$$$  /$$$$$$                               
+                                                 |_  $$_/ /$$__  $$                              
+  /$$$$$$   /$$$$$$   /$$$$$$   /$$$$$$   /$$$$$$  | $$  | $$  \__/  /$$$$$$   /$$$$$$  /$$$$$$$ 
+ |____  $$ /$$__  $$ /$$__  $$ /$$__  $$ /$$__  $$ | $$  | $$       /$$__  $$ /$$__  $$| $$__  $$
+  /$$$$$$$| $$  \__/| $$$$$$$$| $$  \ $$| $$  \ $$ | $$  | $$      | $$  \ $$| $$$$$$$$| $$  \ $$
+ /$$__  $$| $$      | $$_____/| $$  | $$| $$  | $$ | $$  | $$    $$| $$  | $$| $$_____/| $$  | $$
+|  $$$$$$$| $$      |  $$$$$$$| $$$$$$$/|  $$$$$$//$$$$$$|  $$$$$$/|  $$$$$$$|  $$$$$$$| $$  | $$
+ \_______/|__/       \_______/| $$____/  \______/|______/ \______/  \____  $$ \_______/|__/  |__/
+                              | $$                                  /$$  \ $$                    
+                              | $$                                 |  $$$$$$/                    
+                              |__/                                  \______/                     
+               
+    arepoICgen: Function to create initial conditions for the moving mesh code AREPO.  
+                Written by Matt Cusack, 2025. Based on setpartarepo by Paul Clark.             
+'''
 
-# Imports
+# Library imports
 import numpy as np
+import sys
 
-# Defining the code units
-uMass = 1.991e33    # grams
-uDist = 1e17        # cm
-uVelo = 36447.2682  # cm/s
-uEner = 1.328e9     # ergs
-
-# Generate the initial conditions 
-def generateICs(config, params):
-    # Setting ngas
-    ngas = int(params["ngas"])
-
-    # Checking the config keys and assigning defaults
-    configKeys = config.keys()
+# Main class to generate ICs
+class arepoICgen():
+    # Initialise the class and check the input settings
+    def __init__(self, config, params):
+        # Validate the input settings
+        self.validateInput(config, params)
+        
+        # Generate the initial conditions using given settings
+        self.generateICs()
+        
+        # Output the initial conditions to a hdf5 file
+        self.outputICs()
+        
+    # Main function to generate the initial conditions
+    def generateICs(self):
+        # Generate the cell grid
+        from .gridGenerator import generateCellGrid
+        self.ngas, self.positions, self.volume = generateCellGrid(self.config, self.params)
+        
+        # Set mass and temperature of the cells
+        from .massAndEnergy import masses, thermalEnergy
+        self.masses = masses(self.ngas, self.config, self.params) * 1.991e33
+        self.energies = thermalEnergy(self.ngas, self.config, self.params) * 1e7
+        
+        # Add velocity to the cells
+        from .velocityGenerator import addVelocities
+        self.velocities = addVelocities(self.positions, self.masses, self.energies, self.config, self.params)
+        
+        # Make modifications to the ICs
+        if self.config["extras"] != "none":
+            self.modifyICs()
+        
+        # Pad the box around the cloud
+        from .boxPadding import padBox
+        self.ngas, self.positions, self.velocities, self.masses, self.energies = padBox(self.ngas, self.positions, self.velocities,
+                                                                                        self.masses, self.energies, self.volume,
+                                                                                        self.config, self.params)
+            
+        # Provide cells with unique IDs
+        self.cellIDs = np.linspace(1, self.ngas, self.ngas, dtype=np.int32)
     
-    if "rotation" not in configKeys:
-        config["rotation"] = "none"
-    if "extras" not in configKeys:
-        config["extras"] = "none"
-    if "outValue" not in configKeys:
-        config["outValue"] = "masses"
-    if "verbose" not in configKeys:
-        config["verbose"] = False
-    if "turbulence" not in configKeys:
-        config["turbulence"] = "static"
-    if "bField" not in configKeys:
-        config["bField"] = False
-
-    #######################
-    # Grid type selection #
-    #######################
-
-    # Uniform particle grid setups
-    if config["grid"] == "boxGrid":
-        from .boxCreation import boxGrid
-
-        # Creating a box grid
-        pos, ngas, volume = boxGrid(ngas, params["lengths"], config["verbose"])
-
-        # Running the spherical cut module if sphere selected
-    elif config["grid"] == "sphereGrid":
-        # Import modules for the box and then spherical grid
-        from .boxCreation import boxGrid
-        from .shapeTypes import sphericalCloud
-
-        # Increase ngas as we will lose some particles when cutting out the sphere
-        ngas = int(ngas * 6 / np.pi)
-
-        # Our box will always be 2x the radius in each dimension
-        params["lengths"] = [2*params["radii"], 2*params["radii"], 2*params["radii"]]
-
-        # Creating a box grid
-        pos, ngas, volume = boxGrid(ngas, params["lengths"], config["verbose"])
-
-        # Cutting a sphere out of it 
-        ngas, pos, volume = sphericalCloud(pos, params["radii"], ngas, config["verbose"])
-
-    # Randomly placed particle setups
-    elif config["grid"] == "boxRan":
-        from .boxCreation import boxRandom
-
-        # Creating random box grid
-        pos, volume = boxRandom(ngas, params["lengths"], config["verbose"])
-
-    elif config["grid"] == "sphereRan":
-        from .boxCreation import sphereRandom
-
-        # Creating a random spherical grid
-        pos, volume = sphereRandom(ngas, params["radii"], config["verbose"])
-
-    elif config["grid"] == "ellipseRan":
-        from .shapeTypes import ellipsoidalCloud
-
-        # Creating ellipsoid cloud
-        pos, volume = ellipsoidalCloud(params["lengths"], ngas, config["verbose"])
-
-    elif config["grid"] == "cylinderRan":
-        from .shapeTypes import cylindricalCloud
-
-        # Creating cylinderical cloud
-        pos, volume = cylindricalCloud(ngas, params["radii"], params["lengths"], config["verbose"])
-
-    # Adjusting positions to be in cm
-    pos = pos * 3.09e18
-
-    ###########################
-    # Mass and energy defines #
-    ###########################
-
-    from .massAndEnergy import masses
-    from .massAndEnergy import thermalEnergy
-
-    # Setting equal particle masses
-    pMass = masses(ngas, params["mass"], config["verbose"])
-
-    # Converting mass into grams
-    pMass = pMass * 1.991e33 
-
-    # Working out internal energy of each particle along with the sound speed
-    pEnergy = thermalEnergy(ngas, params["temp"], params["mu"], config["verbose"])
-
-    # Converting energy into ergs 
-    pEnergy = pEnergy * 1e7
-    
-    #####################
-    # Special Functions #
-    #####################
-
-    # Add a Boss-Bodenheimer density perturbation (Boss & Bodenheimer 1979)
-    if config["extras"] == "bossBodenheimer":
-        print("Adding Boss-Bodenheimer perturbation")
-        from .densityPerturbations import bossBodenheimer
-        pos, pMass = bossBodenheimer(ngas, pos, pMass)
-
-    # Add a density gradient across one axis (x in this case, 0.66rho -> 1.33rho)
-    elif config["extras"] == "densityGradient":
-        from .densityPerturbations import densityGradient
-        pMass = densityGradient(pos, pMass)
+    # Function to modify the ICs using different density perturbations etc
+    def modifyICs(self):
+        # Add a Boss-Bodenheimer density perturbation (Boss & Bodenheimer 1979)
+        if self.config["extras"] == "bossBodenheimer":
+            from .densityPerturbations import bossBodenheimer
+            self.positions, self.masses = bossBodenheimer(self.ngas, self.positions, self.masses)
+            
+        # Add a density gradient along one axis
+        elif self.config["extras"] == "densityGradient":
+            from .densityPerturbations import densityGradient
+            self.masses = densityGradient(self.positions, self.masses, self.params)
+            
+        # Add a Bonnor-Ebert density profile (Bonnor 1956, Ebert 1955)
+        elif self.config["extras"] == "bonnorEbert":
+            from .bonnorEbertGeneration import createBonnorEbertSphere
+            self.positions, self.masses = createBonnorEbertSphere(self.ngas, self.positions, self.params)
         
-    # Add a Bonnor-Ebert density profile
-    elif config["extras"] == "bonnorEbert":
-        from .bonnorEbertSphere import createBEsphere
-        pos, pMass, ngas, pTemp, rBoundary = createBEsphere(params["mass"], ngas, params["temp"], params["mu"], params["paddingDensity"], params["tempFactor"])
-        pEnergy = pEnergy[0] * pTemp
+    # Function to output the initial conditions to a file
+    def outputICs(self):
+        # Shift all cells such that they are all > 0
+        if np.min(self.positions[0]) < 0:
+            self.positions[0] -= np.min(self.positions[0])
+        if np.min(self.positions[1]) < 0:
+            self.positions[1] -= np.min(self.positions[1])
+        if np.min(self.positions[2]) < 0:
+            self.positions[2] -= np.min(self.positions[2])
+            
+        # Convert all variables into code units
+        self.positions = self.positions / self.uDist
+        self.velocities = self.velocities / self.uVelo
+        self.energies = self.energies / self.uEner
         
-    # Add a centrally condensed density profile
-    elif config["extras"] == "centrallyCondensed":
-        from .densityPerturbations import centrallyCondensedSphere
-        
-        pos, pMass, volume, params["paddingDensity"] = centrallyCondensedSphere(ngas, pos, pMass, params["mass"], params["flatFraction"], params["centralDensity"])
-
-    ##########################
-    # Velocities: Turbulence #
-    ##########################
-
-    # Setup for turbulence from a velocity cube file
-    if config["turbulence"] == "turbFile":
-        print("Assigning turbulent velocities")
-        from .turbulence import turbulenceFromFile
-
-        # Loading in the turbulent velocities from the velocity cube
-        velx, vely, velz = turbulenceFromFile(int(config["turbSize"]), config["turbFile"])
-
-        # Branch for the box scenarios
-        if config["grid"] == "boxGrid" or config["grid"] == "boxRan":
-            from .turbulence import boxGridTurbulence
-
-            # Interpolating and assignning velocities
-            vels = boxGridTurbulence(velx, vely, velz, pos, pMass, int(config["turbSize"]), params["virialParam"])
-
-        # Branch for the spherical scenarios
-        elif config["grid"] == "sphereGrid" or config["grid"] == "sphereRan" or config["grid"] == "ellipseRan" or config["grid"] == "cylinderRan":
-            from .turbulence import sphericalGridTurbulence
-
-            # Interpolating and assigning velocities
-            vels = sphericalGridTurbulence(velx, vely, velz, pos, pMass, int(config["turbSize"]), params["virialParam"])
+        # If we're outputting density as mass, convert accordingly
+        if self.config["outValue"] == "density":
+            self.masses = self.masses / (self.uMass / self.uDist**3)
         else:
-            vels = np.zeros((3, ngas), dtype=np.float64)
-    else:
-        # Assgining an empty velocity array if no tubulence setup
-        vels = np.zeros((3, ngas), dtype=np.float64)
-
-    ########################
-    # Velocities: Rotation #
-    ########################
-
-    # Add rotation to the body
-    if config["rotation"] == "rotation":
-        from .rotation import addRotation
-
-        # Add rotation around z axis of given beta energy ratio
-        vels = addRotation(pos, pMass, vels, params["beta"], params["rotationRadius"], config["verbose"])
-        
-    ############################
-    # Reset BE Cell Properties #
-    ############################
-    
-    # Adjust the properties of the BE sphere
-    if config["extras"] == "bonnorEbert":
-        from .bonnorEbertSphere import adjustProperties
-        
-        vels, pMass = adjustProperties(pos, vels, pMass, rBoundary)
-        
-    ###################################
-    # Setting particle identification #
-    ###################################
-
-    # Assigning each particle an ID from 1 to the max number of particles
-    pIDs = np.linspace(1, ngas, ngas, dtype=np.int32)
-
-    ################################
-    # Low density particle padding #
-    ################################
-
-    # Pad the box with low density particles
-    if config["padding"] == True:
-        from .lowDensityPadding import padGeneric
-
-        pos, vels, pMass, pIDs, pEnergy, pRho, ngasAll = padGeneric(ngas, pos, vels, pMass, pIDs, pEnergy, volume, params["boxSize"], config["grid"], params["tempFactor"], padDensity=params["paddingDensity"], verbose=config["verbose"])
-    else:
-        ngasAll = ngas
-
-    ####################
-    # Moving the cloud #
-    ####################
-
-    # Getting the minimum value of every coordinate
-    minx = np.min(pos[0])
-    miny = np.min(pos[1])
-    minz = np.min(pos[2])
-
-    # Shifting everything if its less than zero
-    if minx < 0:
-        pos[0] -= minx
-    if miny < 0:
-        pos[1] -= miny
-    if minz < 0:
-        pos[2] -= minz
-
-    ############################################
-    # Conversion of quantities into code units #
-    ############################################
-
-    # All variables should be in c.g.s units for conversion
-    pos = pos / uDist
-    vels = vels / uVelo
-    pEnergy = pEnergy / uEner
-    pMass = pMass / uMass
-
-    ##############################
-    # Desired Density Conversion #
-    ##############################
-
-    if config["outValue"] == "density":
-        # Converting the number density to code units
-        densityTarget = params["density"] * params["mu"] * 1.66e-24 
-        densityTarget = densityTarget / (uMass / (uDist**3))
-        densityTargetPadding = densityTarget * 0.01
-
-        # Creating density array
-        pDensity = np.ones_like(pMass)
-        pDensity[0:ngas] = densityTarget
-        pDensity[ngas:-1] = densityTargetPadding
-
-    ########################
-    # File output to AREPO #
-    ########################
-        
-    if config["output"] == "hdf5":
+            self.masses = self.masses / self.uMass       
+            
+        # Output the data to a hdf5 file
         from .arepoOut import hdf5out
-
-        # Writing masses to mass 
-        if config["outValue"] == "masses":
-            # Write the particle data as a hdf5 file
-            hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, config["bField"])
-
-        # Writing density to mass
-        elif config["outValue"] == "density":
-            # Write the particle data as a hdf5 file
-            hdf5out(config["filename"], ngasAll, pos, vels, pIDs, pMass, pEnergy, config["bField"], True, pDensity)
-    else:
-        print("Fortran binary version is broken, sorry </3")
-
-# Function to just easily create a uniform sphere       
-def easySphere(mass, numDense, ngas, filename, mu=1.4, beta=0.05):
-    # Convert number density to density
-    density = numDense * 1.66e-24 * mu
-
-    # Calculate the radius of the sphere
-    volume = (mass*1.991e33) / density
-    radius = (volume * 3/(4*np.pi))**(1/3)
-    radius = radius / 3.09e18
-
-    # Generate the initial conditions
-    config = {
-        "grid": "sphereGrid",
-        "turbulence": "static",
-        "rotation": "rotation",
-        "padding": True,
-        "output": "hdf5",
-        "outValue": "masses",
-        "extras": "none",
-        "bField": False,
-        "filename": filename
-    }
-
-    params = {
-        "ngas": ngas,
-        "bounds": [0, radius*5, 0, radius*5, 0, radius*5],
-        "radii": radius,
-        "mass": mass,
-        "temp": 15,
-        "mu": 1.4,
-        "beta": beta,
-        "boxDims": [5, 5, 5],
-        "tempFactor": 2,
-    }
-
-    generateICs(config, params)
+        hdf5out(self.ngas, self.positions, self.velocities, self.masses, self.energies, self.cellIDs, self.config)   
+        
+    # Function to pass through configs and params and check if valid/present
+    def validateInput(self, config, params):
+        # Assign input settings to class
+        self.config = config
+        self.params = params
+        
+        # Get the keys of each of the settings dictionaries
+        allConfigs = config.keys()
+        allParams = params.keys()
+        
+        # Check grid settings
+        if "ngas" not in allParams:
+            print("No ngas! How many cells do you want?")
+            exit()
+            
+        if "grid" not in allConfigs:
+            print("No grid! How do you want the cells laid out?")
+            exit()
+        else:
+            if config["grid"] == "sphereRan" or config["grid"] == "sphereGrid":
+                if "radii" not in allParams:
+                    print("No radius! How big is the sphere supposed to be?")
+                    exit()
+            else:
+                if "lengths" not in allParams:
+                    print("No box side lengths! How big is the box?")
+                    exit()
+                    
+        # Check mass and energy settings
+        if "mass" not in allParams:
+            print("No mass! How massive is the cloud?")
+            exit()
+        if "temp" not in allParams:
+            print("No temperature! Assuming T = 20K.")
+            params["temp"] = 20
+        if "mu" not in allParams:
+            print("No mu. Assuming mu = 1.4.")
+            params["mu"] = 1.4
+            
+        # Check velocity settings
+        if "turbulence" not in allConfigs:
+            print("No turbulence specified, using static cloud.")
+            config["turbulence"] = "static"
+        elif config["turbulence"] == "turbFile":
+            if "turbFile" not in allConfigs:
+                print("No turbulence file! No grid to interpolate from.")
+                exit()
+            if "turbSize" not in allConfigs:
+                print("No turb file size. Assuming 128x128x128 grid.")
+                config["turbSize"] = 128
+            if "epsilon" not in allParams:
+                print("No virial parameter specified. Assuming virialised cloud.")
+                params["virialParam"] = 2
+        if "rotation" not in allConfigs:
+            config["rotation"] = "none"
+        elif config["rotation"] == "rotation":
+            if "beta" not in allParams:
+                print("No beta specified. Assuming 0.01.")
+                params["beta"] = 0.01
+                
+        # Check padding settings
+        if "padBox" not in allConfigs:
+            config["padBox"] = False
+        else:
+            if "paddingPercent" not in allParams:
+                print("No padding particles percent specified, using 0.02.")
+                params["paddingPercent"] = 0.02
+            if "paddingDensity" not in allParams:
+                print("No padding density specified, using 0.01.")
+                params["paddingDensity"] = 0.01
+            if "boxSize" not in allParams:
+                print("No padding box dimensions provided, using 2x.")
+                params["boxSize"] = [2, 2, 2]
+            if "tempFactor" not in allParams:
+                print("No temperature factor for padding cells provided, using 2x.")
+                params["tempFactor"] = 2      
+                
+        # Check output settings
+        if "outValue" not in allConfigs:
+            config["outValue"] = "mass"
+        if "filename" not in allConfigs:
+            print("No filename given. Please provide filename to save the intitial conditions to.")
+            exit()
+        if "bField" not in allConfigs:
+            config["bField"] = False
+            
+        # Check extras settings                    
+        if "extras" not in allConfigs:
+            config["extras"] = "none"
+        else:
+            if config["extras"] == "bonnorEbert" and config["outValue"] != "density":
+                print("Bonnor-Ebert sphere needs to output as density, forcing density output.")
+                config["outValue"] = "density"
+            
+        # Check verbose setting
+        if "verbose" not in allConfigs:
+            config["verbose"] = False
+                                
+        # Set default code units
+        if "uMass" not in allParams:
+            self.uMass = 1.991e33
+        else:
+            self.uMass = params["uMass"]
+        if "uDist" not in allParams:
+            self.uDist = 1e17 
+        else:
+            self.uDist = params["uDist"]
+        if "uVelo" not in allParams:
+            self.uVelo = 36447.2682
+        else:
+            self.uVelo = params["uVelo"]
+        if "uEner" not in allParams:
+            self.uEner = 1.328e9
+        else:
+            self.uEner = params["uEner"]  

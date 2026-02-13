@@ -89,7 +89,7 @@ def boxRandom(ngas, lengths, verbose=False):
         pos[1][i] = yLength * random()
         pos[2][i] = zLength * random()
 
-    return pos, volume
+    return ngas, pos, volume
 
 def sphereRandom(ngas, radius, verbose=False):
     # Creating particle array
@@ -135,6 +135,6 @@ def sphereRandom(ngas, radius, verbose=False):
         print("New Y Limits: {:.2f} - {:.2f}".format(ymin, ymax))
         print("New Z Limits: {:.2f} - {:.2f}".format(zmin, zmax))
 
-    return pos, volume
+    return ngas, pos, volume
 
 

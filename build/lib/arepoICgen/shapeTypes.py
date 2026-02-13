@@ -96,7 +96,7 @@ def ellipsoidalCloud(lengths, ngas, verbose="False"):
     # Work out volume
     volume = (np.pi * 4/3) * (lengths[0] * lengths[1] * lengths[2])
 
-    return pos, volume
+    return ngas, pos, volume
 
 def cylindricalCloud(ngas, radius, lengths, verbose="False"):
     # Setup the positions arrays
@@ -120,4 +120,4 @@ def cylindricalCloud(ngas, radius, lengths, verbose="False"):
     # Work out volume
     volume = np.pi * radius**2 * lengths[0]
     
-    return pos, volume
+    return ngas, pos, volume
