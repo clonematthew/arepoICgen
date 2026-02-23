@@ -22,9 +22,7 @@ def masses(ngas, config, params):
 # Defining energy of the particles
 def thermalEnergy(ngas, config, params):
     # Calculating internal energy
-    particleMass = params["mass"] * 1.991e33 / ngas
-    
-    energy = (3./2.) * particleMass * params["temp"] * gasConstant / params["mu"]
+    energy = 1e7 * (3./2.) * params["temp"] * gasConstant / params["mu"]
 
     # Calculating a sound speed
     cs = np.sqrt(gasConstant * params["temp"])

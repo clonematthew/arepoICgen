@@ -17,7 +17,6 @@
 
 # Library imports
 import numpy as np
-import sys
 
 # Main class to generate ICs
 class arepoICgen():
@@ -114,26 +113,21 @@ class arepoICgen():
         
         # Check grid settings
         if "ngas" not in allParams:
-            print("No ngas! How many cells do you want?")
-            exit()
+            raise Exception("No ngas! How many cells do you want?")
             
         if "grid" not in allConfigs:
-            print("No grid! How do you want the cells laid out?")
-            exit()
+            raise Exception("No grid! How do you want the cells laid out?")
         else:
             if config["grid"] == "sphereRan" or config["grid"] == "sphereGrid":
                 if "radii" not in allParams:
-                    print("No radius! How big is the sphere supposed to be?")
-                    exit()
+                    raise Exception("No radius! How big is the sphere supposed to be?")
             else:
                 if "lengths" not in allParams:
-                    print("No box side lengths! How big is the box?")
-                    exit()
+                    raise Exception("No box side lengths! How big is the box?")
                     
         # Check mass and energy settings
         if "mass" not in allParams:
-            print("No mass! How massive is the cloud?")
-            exit()
+            raise Exception("No mass! How massive is the cloud?")
         if "temp" not in allParams:
             print("No temperature! Assuming T = 20K.")
             params["temp"] = 20
@@ -147,8 +141,7 @@ class arepoICgen():
             config["turbulence"] = "static"
         elif config["turbulence"] == "turbFile":
             if "turbFile" not in allConfigs:
-                print("No turbulence file! No grid to interpolate from.")
-                exit()
+                raise Exception("No turbulence file! No grid to interpolate from.")
             if "turbSize" not in allConfigs:
                 print("No turb file size. Assuming 128x128x128 grid.")
                 config["turbSize"] = 128
@@ -161,6 +154,9 @@ class arepoICgen():
             if "beta" not in allParams:
                 print("No beta specified. Assuming 0.01.")
                 params["beta"] = 0.01
+            if "rotationRadius" not in allParams:
+                print("No rotation radius specified. Assuming 0 AU.")
+                params["rotationRadius"] = 0
                 
         # Check padding settings
         if "padBox" not in allConfigs:
@@ -183,8 +179,7 @@ class arepoICgen():
         if "outValue" not in allConfigs:
             config["outValue"] = "mass"
         if "filename" not in allConfigs:
-            print("No filename given. Please provide filename to save the intitial conditions to.")
-            exit()
+            raise Exception("No filename given. Please provide filename to save the intitial conditions to.")
         if "bField" not in allConfigs:
             config["bField"] = False
             
@@ -195,6 +190,9 @@ class arepoICgen():
             if config["extras"] == "bonnorEbert" and config["outValue"] != "density":
                 print("Bonnor-Ebert sphere needs to output as density, forcing density output.")
                 config["outValue"] = "density"
+            if config["extras"] == "bonnorEbert" and "centralDensity" not in allParams:
+                print("Bonnor Ebert central density not specified, using 1e-18 in cgs.")
+                params["centralDensity"] = 1e-18
             
         # Check verbose setting
         if "verbose" not in allConfigs:

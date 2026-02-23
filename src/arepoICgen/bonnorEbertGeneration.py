@@ -1,6 +1,5 @@
 # Library imports
 import numpy as np
-import matplotlib.pyplot as plt
 
 # Function to solve the Lame-Emden equation and work out the density for each cell
 def createBonnorEbertSphere(ngas, positions, params):

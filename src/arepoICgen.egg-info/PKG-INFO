@@ -1,6 +1,6 @@
 Metadata-Version: 2.2
 Name: arepoICgen
-Version: 0.2.3
+Version: 0.2.4
 Summary: Package for generating initial conditions for AREPO
 Home-page: https://github.com/clonematthew/arepoICgen
 Author: Matt Cusack
@@ -56,7 +56,7 @@ Note that lengths and radii are both marked as required, but only one may be nee
 | mu* | $\mu$, (**1.4**)| The mean molecular weight of the gas in the cloud, typically 1.4 for atomic and 2.4 for molecular | |
 | virialParam | $\alpha = \rm\frac{E_{Kin}}{E_{Grav}}$, (**2**) | The virial parameter of the cloud, used for scaling turbulent velocities | turbulence |
 | beta | $\beta = \rm \frac{E_{Rot}}{E_{Grav}}$, (**0.01**) | The ratio between rotational and gravitational energy | rotation |
-| rotationRadius | AU | The radius outside of which to add rotation. Allows no angular momentum in the centre of the cloud so that numerical rings do not form | rotation |
+| rotationRadius | AU (**0**) | The radius outside of which to add rotation. Allows no angular momentum in the centre of the cloud so that numerical rings do not form | rotation |
 | boxSize| [x, y, z], (**[2,2,2]**) | The factor by which the box should be larger than the cloud in each dimension (i.e 2x, 3x, 4x the size) | padBox |
 | tempFactor | (**2**) | How much hotter to make the padding particles compared to the cloud particles | padBox |
 | paddingDensity | (**0.01**) | What fraction of the cloud's density should the padding region be (ignored for Bonnor-Ebert profile, padding density set to match outer BE sphere density) | padBox | 
