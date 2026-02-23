@@ -67,7 +67,10 @@ def hdf5out(ngas, pos, vels, pMass, pEnergy, pIDs, config):
         part0.create_dataset("Coordinates", data=writePos)
         part0.create_dataset("Velocities", data=writeVels)
         part0.create_dataset("InternalEnergy", data=pEnergy)
-        part0.create_dataset("Masses", data=pMass) # pMass will be density if config["outValue"] = "density"
+        if config["outValue"] == "density":
+            part0.create_dataset("Density", data=pMass)
+        else:
+            part0.create_dataset("Masses", data=pMass)
 
         # Writing out magnetic field info based on config
         if config["bField"]:
