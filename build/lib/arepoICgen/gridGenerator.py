@@ -2,7 +2,13 @@
 import numpy as np
 
 def generateCellGrid(config, params):
-    if config["grid"] == "boxGrid":
+    if config["extras"] == "bonnorEbert":
+        from .bonnorEbertGeneration import createBonnorEbertSphere
+        
+        # Creating bonnor-ebert sphere
+        pos, ngas, volume = createBonnorEbertSphere(config, params)
+        
+    elif config["grid"] == "boxGrid":
         from .boxCreation import boxGrid
 
         # Creating a box grid

@@ -70,11 +70,6 @@ class arepoICgen():
         elif self.config["extras"] == "densityGradient":
             from .densityPerturbations import densityGradient
             self.masses = densityGradient(self.positions, self.masses, self.params)
-            
-        # Add a Bonnor-Ebert density profile (Bonnor 1956, Ebert 1955)
-        elif self.config["extras"] == "bonnorEbert":
-            from .bonnorEbertGeneration import createBonnorEbertSphere
-            self.positions, self.masses = createBonnorEbertSphere(self.ngas, self.positions, self.params)
         
     # Function to output the initial conditions to a file
     def outputICs(self):
@@ -116,7 +111,13 @@ class arepoICgen():
             raise Exception("No ngas! How many cells do you want?")
             
         if "grid" not in allConfigs:
-            raise Exception("No grid! How do you want the cells laid out?")
+            if "extras" in allConfigs:
+                if config["extras"] == "bonnorEbert":
+                    pass
+                else:
+                    raise Exception("No grid! How do you want the cells laid out?")
+            else:
+                raise Exception("No grid! How do you want the cells laid out?")
         else:
             if config["grid"] == "sphereRan" or config["grid"] == "sphereGrid":
                 if "radii" not in allParams:
@@ -186,13 +187,6 @@ class arepoICgen():
         # Check extras settings                    
         if "extras" not in allConfigs:
             config["extras"] = "none"
-        else:
-            if config["extras"] == "bonnorEbert" and config["outValue"] != "density":
-                print("Bonnor-Ebert sphere needs to output as density, forcing density output.")
-                config["outValue"] = "density"
-            if config["extras"] == "bonnorEbert" and "centralDensity" not in allParams:
-                print("Bonnor Ebert central density not specified, using 1e-18 in cgs.")
-                params["centralDensity"] = 1e-18
             
         # Check verbose setting
         if "verbose" not in allConfigs:
