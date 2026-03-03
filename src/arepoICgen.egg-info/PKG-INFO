@@ -1,6 +1,6 @@
 Metadata-Version: 2.2
 Name: arepoICgen
-Version: 0.2.7
+Version: 0.2.8
 Summary: Package for generating initial conditions for AREPO
 Home-page: https://github.com/clonematthew/arepoICgen
 Author: Matt Cusack
@@ -36,7 +36,7 @@ arepoICgen takes in two python dictionaries as inputs, **config** and **params**
 | turbFile | _path_to_file_ | The path to a turbulent velocity grid file, needed only for _turbFile_ | | 
 | turbSize | **128**, _integer_ | The size of the velocity grid (assumed equal length cubic), needed only for _turbFile_ | |
 | rotation | **none**, rotation | Whether to add rotation to the cloud | beta, rotationRadius |
-| extras | **none**, bossBodenheimer, densityGradient, bonnorEbert | What density perturbation to add to the cloud, either Boss Bodenheimer[^2], a linear density gradient[^3] or a Bonnor-Ebert[^4] density profile (note this setting automatically outputs density as mass) |
+| extras | **none**, bossBodenheimer, densityGradient, bonnorEbert | What density perturbation to add to the cloud, either Boss Bodenheimer[^2], a linear density gradient[^3] or a Bonnor-Ebert[^4] density profile |
 | padBox | **False**, True | Whether to pad the cloud with low density particles | tempFactor, boxDims, paddingDensity, paddingPercent |
 | bField | **False**, True | Whether we need to give the particles an inital magnetic field value (note this does not do anything besides gives particles an initial B field of 0) | |
 | outValue | **masses**, density | Option to output the mass field as density (note this needs AREPO to be compiled with the right config flag for this) | density |
